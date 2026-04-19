@@ -56,7 +56,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
             'id', 'employee_id', 'title', 'name', 'email', 'date_of_joining',
             'tenure_at_adf', 'experience_prior_adf', 'type', 'status',
             'reporting_to', 'team', 'team_name', 'vp_india', 'exit_date',
-            'exit_type', 'exit_quarter'
+            'exit_type', 'exit_quarter', 'created_at'
         )
     
     def validate(self, attrs):

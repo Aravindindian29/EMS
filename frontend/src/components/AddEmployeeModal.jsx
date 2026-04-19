@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 import CustomSelect from './CustomSelect';
 import { employeeAPI, teamAPI, vpIndiaAPI, reportingManagerAPI } from '../services/api';
 
-function AddEmployeeModal({ isOpen, onClose, onSuccess }) {
+function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeData = null }) {
   const [formData, setFormData] = useState({
     employee_id: '',
     title: '',
@@ -30,6 +30,43 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess }) {
       fetchDropdownData();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (mode === 'edit' && employeeData && isOpen) {
+      setFormData({
+        employee_id: employeeData.employee_id || '',
+        title: employeeData.title || '',
+        name: employeeData.name || '',
+        email: employeeData.email || '',
+        date_of_joining: employeeData.date_of_joining || '',
+        experience_prior_adf: employeeData.experience_prior_adf?.toString() || '',
+        type: employeeData.type || '',
+        status: employeeData.status || 'Active',
+        reporting_to: employeeData.reporting_to || '',
+        team: employeeData.team?.id || employeeData.team || '',
+        vp_india: employeeData.vp_india || '',
+      });
+      if (employeeData.date_of_joining) {
+        calculateTenure(employeeData.date_of_joining);
+      }
+    } else if (mode === 'add' && isOpen) {
+      // Reset form for add mode
+      setFormData({
+        employee_id: '',
+        title: '',
+        name: '',
+        email: '',
+        date_of_joining: '',
+        experience_prior_adf: '',
+        type: '',
+        status: 'Active',
+        reporting_to: '',
+        team: '',
+        vp_india: '',
+      });
+      setTenure('');
+    }
+  }, [mode, employeeData, isOpen]);
 
   useEffect(() => {
     if (formData.date_of_joining) {
@@ -83,7 +120,13 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess }) {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.employee_id.trim()) newErrors.employee_id = 'Employee ID is required';
+    // Skip employee_id validation in edit mode
+    if (mode === 'add') {
+      if (!formData.employee_id.trim()) newErrors.employee_id = 'Employee ID is required';
+      else if (!/^ADF\d+$/.test(formData.employee_id.trim())) {
+        newErrors.employee_id = 'Employee ID must start with ADF followed by digits (e.g., ADF123)';
+      }
+    }
     if (!formData.title.trim()) newErrors.title = 'Title is required';
     if (!formData.name.trim()) newErrors.name = 'Name is required';
     if (!formData.email.trim()) newErrors.email = 'Email is required';
@@ -117,11 +160,28 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess }) {
         vp_india: formData.vp_india || null,
       };
 
-      await employeeAPI.create(submitData);
+      if (mode === 'edit') {
+        // Update existing employee
+        await employeeAPI.update(employeeData.id, submitData);
+        
+        // Show success toast
+        if (window.showToast) {
+          window.showToast(`Employee "${formData.name}" details has been successfully updated!`, 'success', 4000);
+        }
+      } else {
+        // Create new employee
+        await employeeAPI.create(submitData);
+        
+        // Show success toast
+        if (window.showToast) {
+          window.showToast(`Employee "${formData.name}" details has been successfully added!`, 'success', 4000);
+        }
+      }
+      
       onSuccess();
       handleClose();
     } catch (error) {
-      console.error('Error creating employee:', error);
+      console.error(`Error ${mode === 'edit' ? 'updating' : 'creating'} employee:`, error);
       if (error.response?.data) {
         setErrors(error.response.data);
       }
@@ -184,7 +244,7 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess }) {
         <div className="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-y-auto glossy-card p-8 m-4">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-3xl font-bold bg-gradient-to-r from-ironman-red via-ironman-gold to-ironman-red bg-clip-text text-transparent">
-              Add Employee
+              {mode === 'edit' ? 'Update Employee Details' : 'Add Employee'}
             </h2>
             <button
               onClick={handleClose}
@@ -206,6 +266,8 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess }) {
                   onChange={(e) => handleChange('employee_id', e.target.value)}
                   className="input-glossy w-full"
                   placeholder="Enter Employee ID"
+                  disabled={mode === 'edit'}
+                  readOnly={mode === 'edit'}
                 />
                 {errors.employee_id && <p className="text-red-400 text-sm mt-1">{errors.employee_id}</p>}
               </div>
@@ -374,18 +436,18 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess }) {
 
             <div className="flex gap-4 pt-6">
               <button
-                type="submit"
-                disabled={loading}
-                className="btn-primary flex-1"
-              >
-                {loading ? 'Adding...' : 'Add Employee'}
-              </button>
-              <button
                 type="button"
                 onClick={handleClose}
                 className="btn-secondary flex-1"
               >
                 Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary flex-1"
+              >
+                {loading ? (mode === 'edit' ? 'Updating...' : 'Adding...') : (mode === 'edit' ? 'Update' : 'Add Employee')}
               </button>
             </div>
           </form>

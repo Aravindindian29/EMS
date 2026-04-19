@@ -207,7 +207,7 @@ const AdvancedSearch = ({ onSearch, onReset, onClose }) => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Employee Name (exact match)"
+            placeholder="Employee Name (partial match)"
             value={searchFilters.name}
             onChange={(e) => handleInputChange('name', e.target.value)}
             className={`input-glossy w-full pl-10 ${
@@ -226,7 +226,7 @@ const AdvancedSearch = ({ onSearch, onReset, onClose }) => {
           <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="Reporting To (exact match)"
+            placeholder="Reporting To (partial match)"
             value={searchFilters.reporting_to}
             onChange={(e) => handleInputChange('reporting_to', e.target.value)}
             className={`input-glossy w-full pl-10 ${
@@ -245,7 +245,7 @@ const AdvancedSearch = ({ onSearch, onReset, onClose }) => {
           <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
-            placeholder="VP India (exact match)"
+            placeholder="VP India (partial match)"
             value={searchFilters.vp_india}
             onChange={(e) => handleInputChange('vp_india', e.target.value)}
             className={`input-glossy w-full pl-10 ${

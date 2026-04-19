@@ -9,6 +9,7 @@ import ExitTrends from './pages/ExitTrends';
 import TeamWiseCount from './pages/TeamWiseCount';
 import AdminPanel from './pages/AdminPanel';
 import Layout from './components/layout/Layout';
+import ToastManager from './components/ToastManager';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -47,6 +48,7 @@ function App() {
           <Route path="admin" element={<AdminRoute><AdminPanel /></AdminRoute>} />
         </Route>
       </Routes>
+      <ToastManager />
     </Router>
   );
 }

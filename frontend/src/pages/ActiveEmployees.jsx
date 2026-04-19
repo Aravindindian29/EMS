@@ -5,6 +5,7 @@ import { Search, Filter, Download, Plus, Edit, Trash2, ChevronLeft, ChevronRight
 import CustomSelect from '../components/CustomSelect';
 import AdvancedSearch from '../components/AdvancedSearch';
 import AddEmployeeModal from '../components/AddEmployeeModal';
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 
 // Utility function to truncate email addresses to 20 characters with periods
 const truncateEmail = (email) => {
@@ -25,6 +26,11 @@ function ActiveEmployees({ user }) {
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [advancedFilters, setAdvancedFilters] = useState({});
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [employeeToEdit, setEmployeeToEdit] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [employeeToDelete, setEmployeeToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   
   // Read URL parameters immediately on initial state setup
   const typeParam = searchParams.get('type');
@@ -132,6 +138,64 @@ function ActiveEmployees({ user }) {
     } catch (error) {
       console.error('Error exporting:', error);
     }
+  };
+
+  const handleEditClick = (employee) => {
+    setEmployeeToEdit(employee);
+    setShowEditModal(true);
+  };
+
+  const handleEditCancel = () => {
+    setShowEditModal(false);
+    setEmployeeToEdit(null);
+  };
+
+  const handleEditSuccess = () => {
+    // Refresh the employee list to show updated data
+    fetchEmployees();
+  };
+
+  const handleDeleteClick = (employee) => {
+    setEmployeeToDelete(employee);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!employeeToDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await employeeAPI.delete(employeeToDelete.id);
+      
+      // Show success toast
+      if (window.showToast) {
+        window.showToast(`Employee "${employeeToDelete.name}" details has been successfully deleted!`, 'success', 4000);
+      }
+      
+      // Remove the deleted employee from the local state
+      setEmployees(prevEmployees => 
+        prevEmployees.filter(emp => emp.id !== employeeToDelete.id)
+      );
+      
+      // Update total count
+      setTotalEmployees(prev => prev - 1);
+      
+      // Close the modal and reset state
+      setShowDeleteModal(false);
+      setEmployeeToDelete(null);
+      
+    } catch (error) {
+      console.error('Error deleting employee:', error);
+      // You could add a toast notification here
+      alert('Failed to delete employee. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setEmployeeToDelete(null);
   };
 
   const isAdmin = user?.role === 'admin';
@@ -304,10 +368,18 @@ function ActiveEmployees({ user }) {
                         {isAdmin && (
                           <td>
                             <div className="flex gap-2">
-                              <button className="p-2 hover:bg-ironman-gold/20 rounded-lg transition-colors">
+                              <button 
+                                onClick={() => handleEditClick(emp)}
+                                className="p-2 hover:bg-ironman-gold/20 rounded-lg transition-colors"
+                                title="Edit Employee"
+                              >
                                 <Edit className="w-4 h-4 text-ironman-gold" />
                               </button>
-                              <button className="p-2 hover:bg-red-500/20 rounded-lg transition-colors">
+                              <button 
+                                onClick={() => handleDeleteClick(emp)}
+                                className="p-2 hover:bg-red-500/20 rounded-lg transition-colors"
+                                title="Delete Employee"
+                              >
                                 <Trash2 className="w-4 h-4 text-red-400" />
                               </button>
                             </div>
@@ -353,6 +425,23 @@ function ActiveEmployees({ user }) {
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         onSuccess={handleAddSuccess}
+      />
+      
+      <AddEmployeeModal
+        isOpen={showEditModal}
+        mode="edit"
+        employeeData={employeeToEdit}
+        onClose={handleEditCancel}
+        onSuccess={handleEditSuccess}
+      />
+      
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        employeeName={employeeToDelete?.name || ''}
+        employeeId={employeeToDelete?.employee_id || ''}
+        isDeleting={isDeleting}
       />
     </div>
   );

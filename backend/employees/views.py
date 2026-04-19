@@ -132,7 +132,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['type', 'status', 'team']
     search_fields = ['employee_id', 'name', 'email', 'title', 'reporting_to', 'vp_india']
-    ordering_fields = ['date_of_joining', 'name', 'employee_id']
+    ordering_fields = ['created_at', 'date_of_joining', 'name', 'employee_id']
     
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -218,11 +218,11 @@ class EmployeeViewSet(viewsets.ModelViewSet):
         if employee_id:
             queryset = queryset.filter(employee_id__iexact=employee_id)
         if name:
-            queryset = queryset.filter(name__iexact=name)
+            queryset = queryset.filter(name__icontains=name)
         if reporting_to:
-            queryset = queryset.filter(reporting_to__iexact=reporting_to)
+            queryset = queryset.filter(reporting_to__icontains=reporting_to)
         if vp_india:
-            queryset = queryset.filter(vp_india__iexact=vp_india)
+            queryset = queryset.filter(vp_india__icontains=vp_india)
         
         # Single DOJ search
         doj = request.query_params.get('doj')
@@ -290,7 +290,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(status=status_filter)
         
         # Ordering
-        ordering = request.query_params.get('ordering', '-date_of_joining')
+        ordering = request.query_params.get('ordering', '-created_at')
         queryset = queryset.order_by(ordering)
         
         # Pagination

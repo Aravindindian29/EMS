@@ -77,6 +77,7 @@ class Employee(models.Model):
     experience_prior_adf = models.DecimalField(max_digits=4, decimal_places=1, help_text="Years of experience")
     exit_date = models.DateField(null=True, blank=True)
     exit_type = models.CharField(max_length=20, choices=EXIT_TYPE_CHOICES, blank=True, default='')
+    created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
         return f"{self.employee_id} - {self.name}"
@@ -103,4 +104,4 @@ class Employee(models.Model):
         return None
     
     class Meta:
-        ordering = ['-date_of_joining']
+        ordering = ['-created_at']
