@@ -1,0 +1,226 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gradient-to-br from-ironman-darker via-ironman-dark to-black text-white;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  }
+}
+
+@layer components {
+  .glossy-card {
+    @apply bg-gradient-to-br from-ironman-dark/90 to-ironman-darker/90 backdrop-blur-xl border border-ironman-red/30 rounded-xl shadow-glossy;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .glossy-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.5), transparent);
+  }
+  
+  .glossy-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  
+  .btn-primary {
+    @apply bg-gradient-to-r from-ironman-red to-ironman-darkRed text-white px-6 py-3 rounded-lg font-semibold shadow-glossy hover:shadow-glossy-lg transition-all duration-300 hover:scale-105;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+    transition: left 0.5s;
+  }
+  
+  .btn-primary:hover::before {
+    left: 100%;
+  }
+  
+  .btn-secondary {
+    @apply bg-gradient-to-r from-ironman-gold to-yellow-500 text-ironman-dark px-6 py-3 rounded-lg font-semibold shadow-glossy-gold hover:shadow-glossy-lg transition-all duration-300 hover:scale-105;
+  }
+  
+  .input-glossy {
+    @apply bg-ironman-dark/50 border border-ironman-red/30 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-ironman-gold focus:ring-2 focus:ring-ironman-gold/50 transition-all backdrop-blur-sm;
+  }
+  
+  .table-glossy {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+  
+  /* Ensure box-sizing includes padding in width calculations */
+  .table-glossy th,
+  .table-glossy td {
+    box-sizing: border-box;
+  }
+  
+  .table-header-container .table-glossy,
+  .table-body-container .table-glossy {
+    width: 100%;
+    min-width: 1640px; /* Total of all column widths to ensure alignment */
+  }
+  
+  /* Ensure both tables have the same exact width */
+  .table-header-container,
+  .table-body-container {
+    width: 100%;
+  }
+  
+  /* Fixed column widths for alignment */
+  .table-glossy th:nth-child(1),
+  .table-glossy td:nth-child(1) { width: 100px; min-width: 100px; }
+  .table-glossy th:nth-child(2),
+  .table-glossy td:nth-child(2) { width: 120px; min-width: 120px; }
+  .table-glossy th:nth-child(3),
+  .table-glossy td:nth-child(3) { width: 150px; min-width: 150px; }
+  .table-glossy th:nth-child(4),
+  .table-glossy td:nth-child(4) { width: 200px; min-width: 200px; }
+  .table-glossy th:nth-child(5),
+  .table-glossy td:nth-child(5) { width: 100px; min-width: 100px; }
+  .table-glossy th:nth-child(6),
+  .table-glossy td:nth-child(6) { width: 120px; min-width: 120px; white-space: nowrap; }
+  .table-glossy th:nth-child(7),
+  .table-glossy td:nth-child(7) { width: 100px; min-width: 100px; }
+  .table-glossy th:nth-child(8),
+  .table-glossy td:nth-child(8) { width: 100px; min-width: 100px; white-space: nowrap; }
+  .table-glossy th:nth-child(9),
+  .table-glossy td:nth-child(9) { width: 80px; min-width: 80px; }
+  .table-glossy th:nth-child(10),
+  .table-glossy td:nth-child(10) { width: 150px; min-width: 150px; }
+  .table-glossy th:nth-child(11),
+  .table-glossy td:nth-child(11) { width: 120px; min-width: 120px; }
+  .table-glossy th:nth-child(12),
+  .table-glossy td:nth-child(12) { width: 120px; min-width: 120px; }
+  .table-glossy th:nth-child(13),
+  .table-glossy td:nth-child(13) { width: 100px; min-width: 100px; }
+  
+  .table-glossy thead {
+    @apply bg-gradient-to-r from-ironman-red/20 to-ironman-darkRed/20 backdrop-blur-sm;
+  }
+  
+  .table-glossy th {
+    @apply px-6 py-4 text-center text-sm font-semibold text-ironman-gold border-b border-ironman-red/30;
+  }
+  
+  .table-glossy tbody tr {
+    @apply border-b border-ironman-red/10 hover:bg-ironman-red/5 transition-colors;
+  }
+  
+  .table-glossy td {
+    @apply px-6 py-4 text-sm text-center;
+  }
+  
+  .stat-card {
+    @apply glossy-card p-6 hover:shadow-glossy-lg transition-all duration-300 hover:scale-105 cursor-pointer;
+  }
+  
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 hover:bg-ironman-red/20 hover:shadow-inner-glossy;
+  }
+  
+  .sidebar-link.active {
+    @apply bg-gradient-to-r from-ironman-red/30 to-ironman-darkRed/30 shadow-inner-glossy;
+  }
+  
+  .employee-table-container {
+    max-height: 600px;
+    position: relative;
+  }
+  
+  .table-header-container {
+    overflow: hidden;
+    padding-right: 8px; /* Compensate for scrollbar width in body container */
+  }
+  
+  .table-body-container {
+    max-height: 550px;
+    overflow-y: auto;
+    overflow-x: auto;
+  }
+  
+  .table-glossy thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: inherit;
+  }
+  
+  /* WebKit scrollbar styling */
+  .table-body-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .table-body-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+  }
+  
+  .table-body-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 0, 0.3);
+    border-radius: 4px;
+  }
+  
+  .table-body-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 215, 0, 0.5);
+  }
+  
+  /* Firefox scrollbar styling */
+  .table-body-container {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 215, 0, 0.3) rgba(255, 255, 255, 0.05);
+  }
+}
+
+.loading-spinner {
+  border: 3px solid rgba(255, 215, 0, 0.1);
+  border-top: 3px solid #FFD700;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(200, 16, 46, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.8);
+  }
+}
+
+
