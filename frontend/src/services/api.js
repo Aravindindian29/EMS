@@ -69,6 +69,7 @@ export const employeeAPI = {
   create: (data) => api.post('/employees/', data),
   update: (id, data) => api.put(`/employees/${id}/`, data),
   delete: (id) => api.delete(`/employees/${id}/`),
+  advancedSearch: (params) => api.get('/employees/advanced-search/', { params }),
   import: (file) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -93,6 +94,22 @@ export const teamAPI = {
 
 export const exitTrendAPI = {
   get: (year) => api.get('/exit-trends/', { params: { year } }),
+};
+
+export const vpIndiaAPI = {
+  getAll: (params) => api.get('/vp-india/', { params }),
+  getOne: (id) => api.get(`/vp-india/${id}/`),
+  create: (data) => api.post('/vp-india/', data),
+  update: (id, data) => api.put(`/vp-india/${id}/`, data),
+  delete: (id) => api.delete(`/vp-india/${id}/`),
+};
+
+export const reportingManagerAPI = {
+  getAll: (params) => api.get('/reporting-managers/', { params }),
+  getOne: (id) => api.get(`/reporting-managers/${id}/`),
+  create: (data) => api.post('/reporting-managers/', data),
+  update: (id, data) => api.put(`/reporting-managers/${id}/`, data),
+  delete: (id) => api.delete(`/reporting-managers/${id}/`),
 };
 
 export default api;

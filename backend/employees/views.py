@@ -13,9 +13,10 @@ from io import BytesIO
 from django.http import HttpResponse
 from collections import defaultdict
 
-from .models import User, Employee, Team
+from .models import User, Employee, Team, VPIndia, ReportingManager
 from .serializers import (
     UserSerializer, EmployeeSerializer, TeamSerializer,
+    VPIndiaSerializer, ReportingManagerSerializer,
     DashboardStatsSerializer, ExitTrendSerializer
 )
 from .permissions import IsAdminUser
@@ -130,7 +131,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
     serializer_class = EmployeeSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['type', 'status', 'team']
-    search_fields = ['employee_id', 'name', 'email', 'title']
+    search_fields = ['employee_id', 'name', 'email', 'title', 'reporting_to', 'vp_india']
     ordering_fields = ['date_of_joining', 'name', 'employee_id']
     
     def get_permissions(self):
@@ -203,6 +204,113 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             })
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['get'], url_path='advanced-search')
+    def advanced_search(self, request):
+        queryset = Employee.objects.all()
+        
+        # Text-based searches - exact matches only
+        employee_id = request.query_params.get('employee_id', '')
+        name = request.query_params.get('name', '')
+        reporting_to = request.query_params.get('reporting_to', '')
+        vp_india = request.query_params.get('vp_india', '')
+        
+        if employee_id:
+            queryset = queryset.filter(employee_id__iexact=employee_id)
+        if name:
+            queryset = queryset.filter(name__iexact=name)
+        if reporting_to:
+            queryset = queryset.filter(reporting_to__iexact=reporting_to)
+        if vp_india:
+            queryset = queryset.filter(vp_india__iexact=vp_india)
+        
+        # Single DOJ search
+        doj = request.query_params.get('doj')
+        
+        if doj:
+            try:
+                doj_date = datetime.strptime(doj, '%Y-%m-%d').date()
+                queryset = queryset.filter(date_of_joining=doj_date)
+            except ValueError:
+                pass
+        
+        # Tenure search - exact match
+        tenure = request.query_params.get('tenure')
+        if tenure:
+            try:
+                # Normalize the tenure input to match the format stored in tenure_at_adf property
+                tenure_normalized = tenure.strip().lower()
+                
+                # Parse tenure input to normalize format (e.g., "2y 3m" -> "2y 3m", "2y" -> "2y", "6m" -> "6m")
+                tenure_parts = tenure_normalized.split()
+                years = 0
+                months = 0
+                
+                for part in tenure_parts:
+                    if part.endswith('y'):
+                        years = int(part[:-1])
+                    elif part.endswith('m'):
+                        months = int(part[:-1])
+                
+                # Create the exact format that tenure_at_adf property returns
+                if years > 0 and months > 0:
+                    exact_tenure = f"{years}y {months}m"
+                elif years > 0:
+                    exact_tenure = f"{years}y"
+                elif months > 0:
+                    exact_tenure = f"{months}m"
+                else:
+                    # Invalid format, skip filtering
+                    pass
+                
+                # Filter employees by exact tenure match using Python evaluation
+                # This ensures exact matching with the tenure_at_adf property
+                employee_ids = []
+                for emp in queryset:
+                    if emp.tenure_at_adf == exact_tenure:
+                        employee_ids.append(emp.id)
+                
+                queryset = queryset.filter(id__in=employee_ids)
+                
+            except (ValueError, AttributeError):
+                pass
+        
+        # Team filtering
+        team_id = request.query_params.get('team')
+        if team_id:
+            queryset = queryset.filter(team_id=team_id)
+        
+        # Additional filters
+        type_filter = request.query_params.get('type')
+        status_filter = request.query_params.get('status')
+        
+        if type_filter:
+            queryset = queryset.filter(type=type_filter)
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+        
+        # Ordering
+        ordering = request.query_params.get('ordering', '-date_of_joining')
+        queryset = queryset.order_by(ordering)
+        
+        # Pagination
+        page = int(request.query_params.get('page', 1))
+        page_size = int(request.query_params.get('page_size', 20))
+        
+        from django.core.paginator import Paginator
+        paginator = Paginator(queryset, page_size)
+        page_obj = paginator.get_page(page)
+        
+        serializer = self.get_serializer(page_obj.object_list, many=True)
+        
+        return Response({
+            'results': serializer.data,
+            'count': paginator.count,
+            'next': page_obj.has_next() and page_obj.next_page_number() or None,
+            'previous': page_obj.has_previous() and page_obj.previous_page_number() or None,
+            'current_page': page,
+            'total_pages': paginator.num_pages,
+        })
     
     @action(detail=False, methods=['get'])
     def export(self, request):
@@ -286,3 +394,25 @@ class TeamViewSet(viewsets.ModelViewSet):
             ])
         
         return response
+
+class VPIndiaViewSet(viewsets.ModelViewSet):
+    queryset = VPIndia.objects.all()
+    serializer_class = VPIndiaSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
+    
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
+
+class ReportingManagerViewSet(viewsets.ModelViewSet):
+    queryset = ReportingManager.objects.all()
+    serializer_class = ReportingManagerSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
+    
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAdminUser()]
+        return [IsAuthenticated()]

@@ -6,6 +6,8 @@ from . import views
 router = DefaultRouter()
 router.register(r'employees', views.EmployeeViewSet, basename='employee')
 router.register(r'teams', views.TeamViewSet, basename='team')
+router.register(r'vp-india', views.VPIndiaViewSet, basename='vp-india')
+router.register(r'reporting-managers', views.ReportingManagerViewSet, basename='reporting-manager')
 
 urlpatterns = [
     path('auth/signup/', views.signup, name='signup'),

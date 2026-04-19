@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from .models import User, Employee, Team
+from .models import User, Employee, Team, VPIndia, ReportingManager
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
@@ -34,6 +34,16 @@ class TeamSerializer(serializers.ModelSerializer):
     
     def get_employee_count(self, obj):
         return obj.employees.filter(status='Active').count()
+
+class VPIndiaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VPIndia
+        fields = ('id', 'name')
+
+class ReportingManagerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ReportingManager
+        fields = ('id', 'name')
 
 class EmployeeSerializer(serializers.ModelSerializer):
     tenure_at_adf = serializers.ReadOnlyField()

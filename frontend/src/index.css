@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Force dropdown hover color override - must be at top for specificity */
+select.input-glossy option:hover,
+.input-glossy option:hover,
+select option:hover,
+option:hover {
+  background-color: #FFD700 !important;
+  background: #FFD700 !important;
+  color: #000000 !important;
+}
+
 @layer base {
   body {
     @apply bg-gradient-to-br from-ironman-darker via-ironman-dark to-black text-white;
@@ -64,6 +74,79 @@
   
   .input-glossy {
     @apply bg-ironman-dark/50 border border-ironman-red/30 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-ironman-gold focus:ring-2 focus:ring-ironman-gold/50 transition-all backdrop-blur-sm;
+  }
+  
+  .input-glossy[type="select"],
+  select.input-glossy {
+    @apply bg-ironman-dark/50 border border-ironman-red/30 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-ironman-gold focus:ring-2 focus:ring-ironman-gold/50 transition-all backdrop-blur-sm;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23FFD700' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.75rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 3rem;
+  }
+  
+  /* Enhanced dropdown option styling */
+  select.input-glossy option {
+    background-color: #C8102E !important;
+    background: #C8102E !important;
+    color: #FFFFFF !important;
+    padding: 12px 16px !important;
+    border: none !important;
+    font-weight: 500 !important;
+  }
+  
+  select.input-glossy option:hover,
+  select.input-glossy option:checked,
+  select.input-glossy option:focus {
+    background-color: #FFD700 !important;
+    background: #FFD700 !important;
+    color: #000000 !important;
+    font-weight: 600 !important;
+  }
+  
+  /* Additional hover state override */
+  select.input-glossy option:hover {
+    background-color: #FFD700 !important;
+    background: #FFD700 !important;
+    color: #000000 !important;
+  }
+  
+  /* Ultra-specific hover override for all browsers */
+  .input-glossy option:hover,
+  select option:hover,
+  option:hover {
+    background-color: #FFD700 !important;
+    background: #FFD700 !important;
+    color: #000000 !important;
+  }
+  
+  /* Custom Select Component Styling */
+  .custom-select {
+    position: relative;
+  }
+
+  .custom-select .absolute {
+    z-index: 9999 !important;
+  }
+
+  /* Hide scrollbar completely for all browsers */
+  .custom-select .max-h-60::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  .custom-select .max-h-60 {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+    overflow: -moz-scrollbars-none !important;
+  }
+
+  /* Dropdown container styling for better visual hierarchy */
+  select.input-glossy:focus {
+    box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.3), 0 0 20px rgba(255, 215, 0, 0.1);
   }
   
   .table-glossy {

@@ -24,6 +24,28 @@ class Team(models.Model):
     class Meta:
         ordering = ['team_name']
 
+class VPIndia(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'VP India'
+        verbose_name_plural = 'VP India'
+
+class ReportingManager(models.Model):
+    name = models.CharField(max_length=200, unique=True)
+    
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        ordering = ['name']
+        verbose_name = 'Reporting Manager'
+        verbose_name_plural = 'Reporting Managers'
+
 class Employee(models.Model):
     TYPE_CHOICES = [
         ('Full Time', 'Full Time'),
@@ -49,9 +71,9 @@ class Employee(models.Model):
     date_of_joining = models.DateField()
     type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Active')
-    reporting_to = models.CharField(max_length=200)
-    team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, related_name='employees')
-    vp_india = models.CharField(max_length=200)
+    reporting_to = models.CharField(max_length=200, null=True, blank=True)
+    team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name='employees')
+    vp_india = models.CharField(max_length=200, null=True, blank=True)
     experience_prior_adf = models.DecimalField(max_digits=4, decimal_places=1, help_text="Years of experience")
     exit_date = models.DateField(null=True, blank=True)
     exit_type = models.CharField(max_length=20, choices=EXIT_TYPE_CHOICES, blank=True, default='')

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { exitTrendAPI } from '../services/api';
 import { BarChart, Bar, PieChart, Pie, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import { Calendar, TrendingDown, Download } from 'lucide-react';
+import CustomSelect from '../components/CustomSelect';
 
 function ExitTrends() {
   const [trends, setTrends] = useState([]);
@@ -64,17 +65,17 @@ function ExitTrends() {
           <p className="text-gray-400">Quarterly exit analysis and trends</p>
         </div>
         <div className="flex gap-4">
-          <div className="relative">
-            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <select
-              value={year}
-              onChange={(e) => setYear(Number(e.target.value))}
-              className="input-glossy pl-11"
-            >
-              <option value="2024">2024</option>
-              <option value="2025">2025</option>
-              <option value="2026">2026</option>
-            </select>
+          <div className="w-30">
+            <CustomSelect
+              value={year.toString()}
+              onChange={(value) => setYear(Number(value))}
+              options={[
+                { value: '2024', label: '2024' },
+                { value: '2025', label: '2025' },
+                { value: '2026', label: '2026' }
+              ]}
+              placeholder="Select Year"
+            />
           </div>
         </div>
       </div>

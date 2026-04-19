@@ -1,13 +1,30 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { employeeAPI } from '../services/api';
-import { Search, Filter, Download, Plus, Edit, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Filter, Download, Plus, Edit, Trash2, ChevronLeft, ChevronRight, ToggleLeft, ToggleRight } from 'lucide-react';
+import CustomSelect from '../components/CustomSelect';
+import AdvancedSearch from '../components/AdvancedSearch';
+import AddEmployeeModal from '../components/AddEmployeeModal';
+
+// Utility function to truncate email addresses to 20 characters with periods
+const truncateEmail = (email) => {
+  if (!email) return '';
+  
+  if (email.length <= 20) {
+    return email;
+  }
+  
+  return email.substring(0, 17) + '...';
+};
 
 function ActiveEmployees({ user }) {
   const [searchParams] = useSearchParams();
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [advancedFilters, setAdvancedFilters] = useState({});
+  const [showAddModal, setShowAddModal] = useState(false);
   
   // Read URL parameters immediately on initial state setup
   const typeParam = searchParams.get('type');
@@ -15,7 +32,7 @@ function ActiveEmployees({ user }) {
   
   const [filters, setFilters] = useState({ 
     type: typeParam || '', 
-    status: statusParam || 'Active', 
+    status: statusParam || '', 
     team: '' 
   });
   const [page, setPage] = useState(1);
@@ -24,7 +41,7 @@ function ActiveEmployees({ user }) {
 
   useEffect(() => {
     fetchEmployees();
-  }, [search, filters, page]);
+  }, [search, filters, page, advancedFilters]);
 
   // Synchronize horizontal scrolling from body to header
   useEffect(() => {
@@ -50,16 +67,30 @@ function ActiveEmployees({ user }) {
   const fetchEmployees = async () => {
     setLoading(true);
     try {
-      const params = {
-        search,
-        page,
-        page_size: 20,
-        ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== '')),
-      };
-      const response = await employeeAPI.getAll(params);
-      setEmployees(response.data.results || response.data);
-      setTotalEmployees(response.data.count || response.data.length);
-      setTotalPages(Math.ceil((response.data.count || response.data.length) / 20));
+      // Use advanced search if advanced filters are applied
+      if (Object.keys(advancedFilters).length > 0) {
+        const params = {
+          page,
+          page_size: 20,
+          ...advancedFilters,
+        };
+        const response = await employeeAPI.advancedSearch(params);
+        setEmployees(response.data.results || response.data);
+        setTotalEmployees(response.data.count || response.data.length);
+        setTotalPages(Math.ceil((response.data.count || response.data.length) / 20));
+      } else {
+        // Use regular search for basic search and filters
+        const params = {
+          search,
+          page,
+          page_size: 20,
+          ...Object.fromEntries(Object.entries(filters).filter(([_, v]) => v !== '')),
+        };
+        const response = await employeeAPI.getAll(params);
+        setEmployees(response.data.results || response.data);
+        setTotalEmployees(response.data.count || response.data.length);
+        setTotalPages(Math.ceil((response.data.count || response.data.length) / 20));
+      }
     } catch (error) {
       console.error('Error fetching employees:', error);
     } finally {
@@ -67,9 +98,30 @@ function ActiveEmployees({ user }) {
     }
   };
 
+  const handleAdvancedSearch = (searchFilters) => {
+    setAdvancedFilters(searchFilters);
+    setPage(1); // Reset to first page when searching
+  };
+
+  const handleResetAdvancedSearch = () => {
+    setAdvancedFilters({});
+    setPage(1); // Reset to first page when resetting
+  };
+
+  const handleCloseAdvancedSearch = () => {
+    setShowAdvancedSearch(false);
+    setAdvancedFilters({});
+    setPage(1); // Reset to first page when closing
+  };
+
+  const handleAddSuccess = () => {
+    fetchEmployees();
+  };
+
   const handleExport = async (format = 'csv') => {
     try {
-      const response = await employeeAPI.export({ format, ...filters });
+      const exportFilters = Object.keys(advancedFilters).length > 0 ? advancedFilters : filters;
+      const response = await employeeAPI.export({ format, ...exportFilters });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
@@ -93,64 +145,106 @@ function ActiveEmployees({ user }) {
           </h1>
           <p className="text-gray-400">Manage and view employee data</p>
         </div>
-        {isAdmin && (
-          <button className="btn-primary flex items-center gap-2">
-            <Plus className="w-5 h-5" />
-            Add Employee
-          </button>
-        )}
-      </div>
-
-      {/* Filters */}
-      <div className="glossy-card p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search employees..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="input-glossy w-full pl-11"
-            />
-          </div>
-
-          <select
-            value={filters.type}
-            onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-            className="input-glossy"
-          >
-            <option value="">All Types</option>
-            <option value="Full Time">Full Time</option>
-            <option value="Intern">Intern</option>
-            <option value="Contract">Contract</option>
-          </select>
-
-          <select
-            value={filters.status}
-            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-            className="input-glossy"
-          >
-            <option value="">All Status</option>
-            <option value="Active">Active</option>
-            <option value="Exited">Exited</option>
-          </select>
-
+        <div className="flex items-center gap-4">
+          {Object.keys(advancedFilters).length > 0 && (
+            <span className="text-ironman-gold text-sm">
+              {Object.keys(advancedFilters).length} filter{Object.keys(advancedFilters).length > 1 ? 's' : ''} applied
+            </span>
+          )}
           <button
-            onClick={() => handleExport('csv')}
-            className="btn-secondary flex items-center justify-center gap-2"
+            onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
+            className="btn-secondary flex items-center gap-2"
           >
-            <Download className="w-5 h-5" />
-            Export CSV
+            {showAdvancedSearch ? <ToggleLeft className="w-5 h-5" /> : <ToggleRight className="w-5 h-5" />}
+            {showAdvancedSearch ? 'Basic Search' : 'Advanced Search'}
           </button>
+          {isAdmin && (
+            <button 
+              onClick={() => setShowAddModal(true)}
+              className="btn-primary flex items-center gap-2"
+            >
+              <Plus className="w-5 h-5" />
+              Add Employee
+            </button>
+          )}
         </div>
       </div>
+
+      {/* Advanced Search */}
+      {showAdvancedSearch ? (
+        <AdvancedSearch
+          onSearch={handleAdvancedSearch}
+          onReset={handleResetAdvancedSearch}
+          onClose={handleCloseAdvancedSearch}
+        />
+      ) : (
+        /* Basic Filters */
+        <div className="glossy-card p-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search employees..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="input-glossy w-full pl-11"
+              />
+            </div>
+
+            <CustomSelect
+              value={filters.type}
+              onChange={(value) => setFilters({ ...filters, type: value })}
+              options={[
+                { value: "", label: "All Type" },
+                { value: "Full Time", label: "Full Time" },
+                { value: "Intern", label: "Intern" },
+                { value: "Contract", label: "Contract" }
+              ]}
+              placeholder="All Type"
+              className="w-full"
+            />
+
+            <CustomSelect
+              value={filters.status}
+              onChange={(value) => setFilters({ ...filters, status: value })}
+              options={[
+                { value: "", label: "All Status" },
+                { value: "Active", label: "Active" },
+                { value: "Exited", label: "Exited" }
+              ]}
+              placeholder="Select Status"
+              className="w-full"
+            />
+
+            <button
+              onClick={() => handleExport('csv')}
+              className="btn-secondary flex items-center justify-center gap-2"
+            >
+              <Download className="w-5 h-5" />
+              Export CSV
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Table */}
       <div className="glossy-card overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <div className="loading-spinner"></div>
+          </div>
+        ) : employees.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-64">
+            <div className="text-gray-400 text-center">
+              <div className="mb-4">
+                <Search className="w-16 h-16 mx-auto text-gray-500" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-300 mb-2">No Results Found</h3>
+              <p className="text-gray-500">
+                No employees match your search criteria.
+              </p>
+            </div>
           </div>
         ) : (
           <>
@@ -184,13 +278,13 @@ function ActiveEmployees({ user }) {
                         <td className="font-mono text-ironman-gold">{emp.employee_id}</td>
                         <td>{emp.title}</td>
                         <td className="font-semibold">{emp.name}</td>
-                        <td className="text-gray-400">{emp.email}</td>
+                        <td className="text-gray-400" title={emp.email}>{truncateEmail(emp.email)}</td>
                         <td>{new Date(emp.date_of_joining).toLocaleDateString()}</td>
                         <td className="text-ironman-gold">{emp.tenure_at_adf}</td>
                         <td>{emp.experience_prior_adf} yrs</td>
                         <td>
                           <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            emp.type === 'Full Time' ? 'bg-ironman-red/20 text-ironman-red' :
+                            emp.type === 'Full Time' ? 'bg-teal-500/20 text-teal-400' :
                             emp.type === 'Intern' ? 'bg-ironman-gold/20 text-ironman-gold' :
                             'bg-purple-500/20 text-purple-400'
                           }`}>
@@ -254,6 +348,12 @@ function ActiveEmployees({ user }) {
           </>
         )}
       </div>
+
+      <AddEmployeeModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={handleAddSuccess}
+      />
     </div>
   );
 }
