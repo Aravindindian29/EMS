@@ -252,7 +252,33 @@ option:hover {
     background: inherit;
   }
   
-  /* WebKit scrollbar styling */
+  /* Reusable custom scrollbar class */
+  .custom-scrollbar {
+    /* WebKit scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 215, 0, 0.3) rgba(255, 255, 255, 0.05);
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(255, 215, 0, 0.3);
+    border-radius: 4px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 215, 0, 0.5);
+  }
+
+  /* WebKit scrollbar styling for table-body-container (backward compatibility) */
   .table-body-container::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -272,7 +298,7 @@ option:hover {
     background: rgba(255, 215, 0, 0.5);
   }
   
-  /* Firefox scrollbar styling */
+  /* Firefox scrollbar styling for table-body-container (backward compatibility) */
   .table-body-container {
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 215, 0, 0.3) rgba(255, 255, 255, 0.05);

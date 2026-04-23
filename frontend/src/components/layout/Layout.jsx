@@ -17,7 +17,7 @@ function Layout({ user, setIsAuthenticated }) {
 
   const menuItems = [
     { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { path: '/employees', icon: Users, label: 'Active Employees' },
+    { path: '/employees', icon: Users, label: 'Employee Details' },
     { path: '/exit-trends', icon: TrendingDown, label: 'Exit Trends' },
     { path: '/teams', icon: Network, label: 'Team Wise Count' },
   ];

@@ -26,10 +26,10 @@ const DeleteConfirmationModal = ({
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-all duration-200"
+            className="p-2 text-gray-400 hover:text-white hover:bg-ironman-red/20 rounded-lg transition-all duration-200"
             disabled={isDeleting}
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 text-ironman-gold" />
           </button>
         </div>
 

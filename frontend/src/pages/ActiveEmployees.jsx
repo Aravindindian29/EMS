@@ -6,6 +6,7 @@ import CustomSelect from '../components/CustomSelect';
 import AdvancedSearch from '../components/AdvancedSearch';
 import AddEmployeeModal from '../components/AddEmployeeModal';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
+import EmployeeDetailsModal from '../components/EmployeeDetailsModal';
 
 // Utility function to truncate email addresses to 20 characters with periods
 const truncateEmail = (email) => {
@@ -31,6 +32,8 @@ function ActiveEmployees({ user }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [employeeToView, setEmployeeToView] = useState(null);
   
   // Read URL parameters immediately on initial state setup
   const typeParam = searchParams.get('type');
@@ -155,6 +158,16 @@ function ActiveEmployees({ user }) {
     fetchEmployees();
   };
 
+  const handleEmployeeClick = (employee) => {
+    setEmployeeToView(employee);
+    setShowDetailsModal(true);
+  };
+
+  const handleDetailsClose = () => {
+    setShowDetailsModal(false);
+    setEmployeeToView(null);
+  };
+
   const handleDeleteClick = (employee) => {
     setEmployeeToDelete(employee);
     setShowDeleteModal(true);
@@ -205,7 +218,7 @@ function ActiveEmployees({ user }) {
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold bg-gradient-to-r from-ironman-red via-ironman-gold to-ironman-red bg-clip-text text-transparent mb-2">
-            Active Employees
+            Employee Details
           </h1>
           <p className="text-gray-400">Manage and view employee data</p>
         </div>
@@ -228,7 +241,7 @@ function ActiveEmployees({ user }) {
               className="btn-primary flex items-center gap-2"
             >
               <Plus className="w-5 h-5" />
-              Add Employee
+              Add Employee Details
             </button>
           )}
         </div>
@@ -338,7 +351,11 @@ function ActiveEmployees({ user }) {
                 <table className="table-glossy">
                   <tbody>
                     {employees.map((emp) => (
-                      <tr key={emp.id}>
+                      <tr 
+                        key={emp.id}
+                        onClick={() => handleEmployeeClick(emp)}
+                        className="cursor-pointer hover:bg-ironman-gold/10 transition-colors"
+                      >
                         <td className="font-mono text-ironman-gold">{emp.employee_id}</td>
                         <td>{emp.title}</td>
                         <td className="font-semibold">{emp.name}</td>
@@ -366,7 +383,7 @@ function ActiveEmployees({ user }) {
                         <td>{emp.team_name}</td>
                         <td>{emp.vp_india}</td>
                         {isAdmin && (
-                          <td>
+                          <td onClick={(e) => e.stopPropagation()}>
                             <div className="flex gap-2">
                               <button 
                                 onClick={() => handleEditClick(emp)}
@@ -442,6 +459,12 @@ function ActiveEmployees({ user }) {
         employeeName={employeeToDelete?.name || ''}
         employeeId={employeeToDelete?.employee_id || ''}
         isDeleting={isDeleting}
+      />
+      
+      <EmployeeDetailsModal
+        isOpen={showDetailsModal}
+        onClose={handleDetailsClose}
+        employeeData={employeeToView}
       />
     </div>
   );

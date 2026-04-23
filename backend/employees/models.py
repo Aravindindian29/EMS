@@ -48,12 +48,14 @@ class ReportingManager(models.Model):
 
 class Employee(models.Model):
     TYPE_CHOICES = [
+        ('', 'None'),
         ('Full Time', 'Full Time'),
         ('Intern', 'Intern'),
         ('Contract', 'Contract'),
     ]
     
     STATUS_CHOICES = [
+        ('', 'None'),
         ('Active', 'Active'),
         ('Exited', 'Exited'),
     ]

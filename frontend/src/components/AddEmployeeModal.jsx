@@ -12,10 +12,12 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
     date_of_joining: '',
     experience_prior_adf: '',
     type: '',
-    status: 'Active',
+    status: '',
     reporting_to: '',
     team: '',
     vp_india: '',
+    exit_date: '',
+    exit_type: '',
   });
 
   const [teams, setTeams] = useState([]);
@@ -45,6 +47,8 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
         reporting_to: employeeData.reporting_to || '',
         team: employeeData.team?.id || employeeData.team || '',
         vp_india: employeeData.vp_india || '',
+        exit_date: employeeData.exit_date || '',
+        exit_type: employeeData.exit_type || '',
       });
       if (employeeData.date_of_joining) {
         calculateTenure(employeeData.date_of_joining);
@@ -59,10 +63,12 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
         date_of_joining: '',
         experience_prior_adf: '',
         type: '',
-        status: 'Active',
+        status: '',
         reporting_to: '',
         team: '',
         vp_india: '',
+        exit_date: '',
+        exit_type: '',
       });
       setTenure('');
     }
@@ -136,8 +142,14 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
     else if (isNaN(formData.experience_prior_adf) || parseFloat(formData.experience_prior_adf) < 0) {
       newErrors.experience_prior_adf = 'Prior Experience must be a positive number';
     }
-    if (!formData.type) newErrors.type = 'Type is required';
-    if (!formData.status) newErrors.status = 'Status is required';
+    
+    // Validate exit fields when status is Exited
+    if (formData.status === 'Exited') {
+      if (!formData.exit_date) newErrors.exit_date = 'Exit date is required for exited employees';
+      if (!formData.exit_type) newErrors.exit_type = 'Exit type is required for exited employees';
+    }
+    
+    // Type and status are no longer required since None is a valid option
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -158,6 +170,8 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
         team: formData.team || null,
         reporting_to: formData.reporting_to || null,
         vp_india: formData.vp_india || null,
+        exit_date: formData.exit_date || null,
+        exit_type: formData.exit_type || '',
       };
 
       if (mode === 'edit') {
@@ -203,6 +217,8 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
       reporting_to: '',
       team: '',
       vp_india: '',
+      exit_date: '',
+      exit_type: '',
     });
     setTenure('');
     setErrors({});
@@ -241,10 +257,10 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
       <div className="fixed inset-0 z-50 flex items-center justify-center">
         <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={handleClose}></div>
         
-        <div className="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-y-auto glossy-card p-8 m-4">
+        <div className="relative z-10 w-full max-w-3xl max-h-[90vh] overflow-y-auto glossy-card p-8 m-4 custom-scrollbar">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-3xl font-bold bg-gradient-to-r from-ironman-red via-ironman-gold to-ironman-red bg-clip-text text-transparent">
-              {mode === 'edit' ? 'Update Employee Details' : 'Add Employee'}
+              {mode === 'edit' ? 'Update Employee Details' : 'Add Employee Details'}
             </h2>
             <button
               onClick={handleClose}
@@ -357,12 +373,13 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
 
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Type <span className="text-ironman-red">*</span>
+                  Type
                 </label>
                 <CustomSelect
                   value={formData.type}
                   onChange={(value) => handleChange('type', value)}
                   options={[
+                    { value: '', label: 'None' },
                     { value: 'Full Time', label: 'Full Time' },
                     { value: 'Intern', label: 'Intern' },
                     { value: 'Contract', label: 'Contract' },
@@ -374,12 +391,13 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
 
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-2">
-                  Status <span className="text-ironman-red">*</span>
+                  Status
                 </label>
                 <CustomSelect
                   value={formData.status}
                   onChange={(value) => handleChange('status', value)}
                   options={[
+                    { value: '', label: 'None' },
                     { value: 'Active', label: 'Active' },
                     { value: 'Exited', label: 'Exited' },
                   ]}
@@ -387,6 +405,40 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
                 />
                 {errors.status && <p className="text-red-400 text-sm mt-1">{errors.status}</p>}
               </div>
+
+              {formData.status === 'Exited' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
+                      Exit Date <span className="text-ironman-red">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.exit_date}
+                      onChange={(e) => handleChange('exit_date', e.target.value)}
+                      className="input-glossy w-full"
+                    />
+                    {errors.exit_date && <p className="text-red-400 text-sm mt-1">{errors.exit_date}</p>}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">
+                      Exit Type <span className="text-ironman-red">*</span>
+                    </label>
+                    <CustomSelect
+                      value={formData.exit_type}
+                      onChange={(value) => handleChange('exit_type', value)}
+                      options={[
+                        { value: '', label: 'Select Exit Type' },
+                        { value: 'Voluntary', label: 'Voluntary' },
+                        { value: 'Termination', label: 'Termination' },
+                      ]}
+                      placeholder="Select Exit Type"
+                    />
+                    {errors.exit_type && <p className="text-red-400 text-sm mt-1">{errors.exit_type}</p>}
+                  </div>
+                </>
+              )}
 
               <div>
                 <label className="block text-sm font-semibold text-gray-300 mb-2">
@@ -447,7 +499,7 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
                 disabled={loading}
                 className="btn-primary flex-1"
               >
-                {loading ? (mode === 'edit' ? 'Updating...' : 'Adding...') : (mode === 'edit' ? 'Update' : 'Add Employee')}
+                {loading ? (mode === 'edit' ? 'Updating...' : 'Adding...') : (mode === 'edit' ? 'Update' : 'Add Employee Details')}
               </button>
             </div>
           </form>
