@@ -7,6 +7,7 @@ import AdvancedSearch from '../components/AdvancedSearch';
 import AddEmployeeModal from '../components/AddEmployeeModal';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import EmployeeDetailsModal from '../components/EmployeeDetailsModal';
+import { displayValueOrNA, displayTeamOrNA } from '../utils/helpers';
 
 // Utility function to truncate email addresses to 20 characters with periods
 const truncateEmail = (email) => {
@@ -127,19 +128,65 @@ function ActiveEmployees({ user }) {
     fetchEmployees();
   };
 
-  const handleExport = async (format = 'csv') => {
+  const handleExport = async (format = 'csv', event) => {
     try {
+      // Show loading state
+      if (event && event.target) {
+        const originalText = event.target.innerText;
+        event.target.innerHTML = '<span class="loading-spinner"></span> Exporting...';
+        event.target.disabled = true;
+      }
+
       const exportFilters = Object.keys(advancedFilters).length > 0 ? advancedFilters : filters;
+      console.log('Exporting with filters:', exportFilters);
+      
       const response = await employeeAPI.export({ format, ...exportFilters });
-      const url = window.URL.createObjectURL(new Blob([response.data]));
+      console.log('Export response:', response);
+      
+      // Check if response has data
+      if (!response.data) {
+        throw new Error('No data received from server');
+      }
+
+      // Create blob from response data
+      const blob = new Blob([response.data], { 
+        type: format === 'csv' ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      });
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', `employees_${new Date().toISOString().split('T')[0]}.${format}`);
+      
+      // Trigger download
       document.body.appendChild(link);
       link.click();
+      
+      // Cleanup
       link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      // Show success message
+      if (window.showToast) {
+        window.showToast(`Employee data exported successfully as ${format.toUpperCase()}!`, 'success', 3000);
+      }
+      
     } catch (error) {
       console.error('Error exporting:', error);
+      
+      // Show error message
+      if (window.showToast) {
+        window.showToast(`Failed to export data: ${error.message || 'Unknown error'}`, 'error', 5000);
+      } else {
+        alert(`Failed to export data: ${error.message || 'Unknown error'}`);
+      }
+    } finally {
+      // Restore button state
+      if (event.target) {
+        event.target.innerHTML = '<Download className="w-5 h-5" />Export CSV';
+        event.target.disabled = false;
+      }
     }
   };
 
@@ -259,14 +306,16 @@ function ActiveEmployees({ user }) {
         <div className="glossy-card p-6 mb-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search employees..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="input-glossy w-full pl-11"
-              />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                <input
+                  type="text"
+                  placeholder="Search employees..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="input-glossy w-full pl-11"
+                />
+              </div>
             </div>
 
             <CustomSelect
@@ -295,7 +344,7 @@ function ActiveEmployees({ user }) {
             />
 
             <button
-              onClick={() => handleExport('csv')}
+              onClick={(e) => handleExport('csv', e)}
               className="btn-secondary flex items-center justify-center gap-2"
             >
               <Download className="w-5 h-5" />
@@ -359,29 +408,37 @@ function ActiveEmployees({ user }) {
                         <td className="font-mono text-ironman-gold">{emp.employee_id}</td>
                         <td>{emp.title}</td>
                         <td className="font-semibold">{emp.name}</td>
-                        <td className="text-gray-400" title={emp.email}>{truncateEmail(emp.email)}</td>
+                        <td title={emp.email}>{truncateEmail(emp.email)}</td>
                         <td>{new Date(emp.date_of_joining).toLocaleDateString()}</td>
                         <td className="text-ironman-gold">{emp.tenure_at_adf}</td>
                         <td>{emp.experience_prior_adf} yrs</td>
                         <td>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            emp.type === 'Full Time' ? 'bg-teal-500/20 text-teal-400' :
-                            emp.type === 'Intern' ? 'bg-ironman-gold/20 text-ironman-gold' :
-                            'bg-purple-500/20 text-purple-400'
-                          }`}>
-                            {emp.type}
-                          </span>
+                          {emp.type ? (
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              emp.type === 'Full Time' ? 'bg-teal-500/20 text-teal-400' :
+                              emp.type === 'Intern' ? 'bg-ironman-gold/20 text-ironman-gold' :
+                              'bg-purple-500/20 text-purple-400'
+                            }`}>
+                              {emp.type}
+                            </span>
+                          ) : (
+                            'NA'
+                          )}
                         </td>
                         <td>
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            emp.status === 'Active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
-                          }`}>
-                            {emp.status}
-                          </span>
+                          {emp.status ? (
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              emp.status === 'Active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
+                            }`}>
+                              {emp.status}
+                            </span>
+                          ) : (
+                            'NA'
+                          )}
                         </td>
-                        <td>{emp.reporting_to}</td>
-                        <td>{emp.team_name}</td>
-                        <td>{emp.vp_india}</td>
+                        <td>{displayValueOrNA(emp.reporting_to)}</td>
+                        <td>{displayTeamOrNA(emp.team_name)}</td>
+                        <td>{displayValueOrNA(emp.vp_india)}</td>
                         {isAdmin && (
                           <td onClick={(e) => e.stopPropagation()}>
                             <div className="flex gap-2">

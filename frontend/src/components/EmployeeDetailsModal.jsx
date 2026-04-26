@@ -1,4 +1,5 @@
 import { X, ClipboardList, User, Calendar, Briefcase, Users, Building2, Clock, LogOut } from 'lucide-react';
+import { displayValueOrNA, displayTeamOrNA } from '../utils/helpers';
 
 const EmployeeDetailsModal = ({ isOpen, onClose, employeeData }) => {
   if (!isOpen || !employeeData) return null;
@@ -93,9 +94,13 @@ const EmployeeDetailsModal = ({ isOpen, onClose, employeeData }) => {
                   </div>
                   <div>
                     <p className="text-ironman-gold text-sm font-semibold mb-1">Type</p>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getTypeColor(employeeData.type)}`}>
-                      {employeeData.type || 'None'}
-                    </span>
+                    {employeeData.type ? (
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getTypeColor(employeeData.type)}`}>
+                        {employeeData.type}
+                      </span>
+                    ) : (
+                      <span className="text-white">NA</span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -136,9 +141,13 @@ const EmployeeDetailsModal = ({ isOpen, onClose, employeeData }) => {
                 <Users className="w-4 h-4 text-ironman-gold" />
                 <p className="text-ironman-gold text-sm font-semibold">Status</p>
               </div>
-              <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(employeeData.status)}`}>
-                {employeeData.status || 'None'}
-              </span>
+              {employeeData.status ? (
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(employeeData.status)}`}>
+                  {employeeData.status}
+                </span>
+              ) : (
+                <span className="text-white">NA</span>
+              )}
             </div>
           </div>
         </div>
@@ -152,15 +161,15 @@ const EmployeeDetailsModal = ({ isOpen, onClose, employeeData }) => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-ironman-dark/40 border border-ironman-red/30 rounded-xl p-4">
               <p className="text-ironman-gold text-sm font-semibold mb-2">Reporting To</p>
-              <p className="text-white">{employeeData.reporting_to || 'None'}</p>
+              <p className="text-white">{displayValueOrNA(employeeData.reporting_to)}</p>
             </div>
             <div className="bg-ironman-dark/40 border border-ironman-red/30 rounded-xl p-4">
               <p className="text-ironman-gold text-sm font-semibold mb-2">Team</p>
-              <p className="text-white">{employeeData.team_name || 'None'}</p>
+              <p className="text-white">{displayTeamOrNA(employeeData.team_name)}</p>
             </div>
             <div className="bg-ironman-dark/40 border border-ironman-red/30 rounded-xl p-4">
               <p className="text-ironman-gold text-sm font-semibold mb-2">VP India</p>
-              <p className="text-white">{employeeData.vp_india || 'None'}</p>
+              <p className="text-white">{displayValueOrNA(employeeData.vp_india)}</p>
             </div>
           </div>
         </div>

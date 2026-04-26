@@ -76,7 +76,7 @@ class Employee(models.Model):
     reporting_to = models.CharField(max_length=200, null=True, blank=True)
     team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True, blank=True, related_name='employees')
     vp_india = models.CharField(max_length=200, null=True, blank=True)
-    experience_prior_adf = models.DecimalField(max_digits=4, decimal_places=1, help_text="Years of experience")
+    experience_prior_adf = models.CharField(max_length=10, help_text="Years of experience")
     exit_date = models.DateField(null=True, blank=True)
     exit_type = models.CharField(max_length=20, choices=EXIT_TYPE_CHOICES, blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)

@@ -77,10 +77,13 @@ export const employeeAPI = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
   },
-  export: (params) => api.get('/employees/export/', { 
-    params,
-    responseType: 'blob'
-  }),
+  export: (params) => {
+    const { format, ...otherParams } = params;
+    return api.get('/employees/export/', { 
+      params: { export_format: format, ...otherParams },
+      responseType: 'blob'
+    });
+  },
 };
 
 export const teamAPI = {

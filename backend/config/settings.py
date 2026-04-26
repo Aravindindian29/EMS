@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-gbz62_!@j@pt*jbg0nmv%$vzc$$*bzp*5awyhvfs+t93sml7*-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
 
 
 # Application definition
@@ -144,6 +144,14 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ],
+    'DEFAULT_FORMAT_SUFFIXES': {
+        'json': None,
+        'api': None,
+    },
 }
 
 from datetime import timedelta

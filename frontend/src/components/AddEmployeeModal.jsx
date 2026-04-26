@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import CustomSelect from './CustomSelect';
+import CustomDatePicker from './CustomDatePicker';
 import { employeeAPI, teamAPI, vpIndiaAPI, reportingManagerAPI } from '../services/api';
 
 function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeData = null }) {
@@ -43,7 +44,7 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
         date_of_joining: employeeData.date_of_joining || '',
         experience_prior_adf: employeeData.experience_prior_adf?.toString() || '',
         type: employeeData.type || '',
-        status: employeeData.status || 'Active',
+        status: employeeData.status || '',
         reporting_to: employeeData.reporting_to || '',
         team: employeeData.team?.id || employeeData.team || '',
         vp_india: employeeData.vp_india || '',
@@ -117,9 +118,26 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
   };
 
   const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+    // If status is being changed from "Exited" to something else, clear exit-related fields
+    if (field === 'status' && formData.status === 'Exited' && value !== 'Exited') {
+      setFormData(prev => ({ 
+        ...prev, 
+        [field]: value,
+        exit_date: '',
+        exit_type: ''
+      }));
+      // Clear errors for exit fields as well
+      setErrors(prev => ({ 
+        ...prev, 
+        [field]: '', 
+        exit_date: '', 
+        exit_type: '' 
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+      if (errors[field]) {
+        setErrors(prev => ({ ...prev, [field]: '' }));
+      }
     }
   };
 
@@ -334,11 +352,11 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
                 <label className="block text-sm font-semibold text-gray-300 mb-2">
                   DOJ <span className="text-ironman-red">*</span>
                 </label>
-                <input
-                  type="date"
+                <CustomDatePicker
                   value={formData.date_of_joining}
-                  onChange={(e) => handleChange('date_of_joining', e.target.value)}
-                  className="input-glossy w-full"
+                  onChange={(value) => handleChange('date_of_joining', value)}
+                  placeholder="Select Date of Joining"
+                  maxDate={new Date()} // Restrict to past dates for DOJ
                 />
                 {errors.date_of_joining && <p className="text-red-400 text-sm mt-1">{errors.date_of_joining}</p>}
               </div>
@@ -361,12 +379,19 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
                   Prior Exp (years) <span className="text-ironman-red">*</span>
                 </label>
                 <input
-                  type="number"
-                  step="0.1"
+                  type="text"
                   value={formData.experience_prior_adf}
-                  onChange={(e) => handleChange('experience_prior_adf', e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Allow numbers with up to 2 decimal places
+                    const regex = /^\d*\.?\d{0,2}$/;
+                    if (value === '' || regex.test(value)) {
+                      handleChange('experience_prior_adf', value);
+                    }
+                  }}
                   className="input-glossy w-full"
                   placeholder="Enter Prior Experience"
+                  inputMode="decimal"
                 />
                 {errors.experience_prior_adf && <p className="text-red-400 text-sm mt-1">{errors.experience_prior_adf}</p>}
               </div>
@@ -412,11 +437,10 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
                     <label className="block text-sm font-semibold text-gray-300 mb-2">
                       Exit Date <span className="text-ironman-red">*</span>
                     </label>
-                    <input
-                      type="date"
+                    <CustomDatePicker
                       value={formData.exit_date}
-                      onChange={(e) => handleChange('exit_date', e.target.value)}
-                      className="input-glossy w-full"
+                      onChange={(value) => handleChange('exit_date', value)}
+                      placeholder="Select Exit Date"
                     />
                     {errors.exit_date && <p className="text-red-400 text-sm mt-1">{errors.exit_date}</p>}
                   </div>

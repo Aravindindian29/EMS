@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Search, Calendar, Users, User, Building2, Filter, X } from 'lucide-react';
 import CustomSelect from './CustomSelect';
+import CustomDatePicker from './CustomDatePicker';
 import { employeeAPI, teamAPI } from '../services/api';
 
 const AdvancedSearch = ({ onSearch, onReset, onClose }) => {
@@ -31,30 +32,7 @@ const AdvancedSearch = ({ onSearch, onReset, onClose }) => {
     }
   };
 
-  const validateDOJ = (doj) => {
-    if (!doj) return ''; // Empty is valid
-    
-    // Check YYYY-MM-DD format
-    const regex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!regex.test(doj)) {
-      return 'Date must be in YYYY-MM-DD format';
-    }
-    
-    // Check if it's a valid date
-    const date = new Date(doj);
-    if (isNaN(date.getTime())) {
-      return 'Invalid date';
-    }
-    
-    // Check if the date components match (prevents 2023-02-30 from being valid)
-    const [year, month, day] = doj.split('-').map(Number);
-    if (date.getFullYear() !== year || date.getMonth() + 1 !== month || date.getDate() !== day) {
-      return 'Invalid date';
-    }
-    
-    return ''; // No error
-  };
-
+  
   const validateTenure = (tenure) => {
     if (!tenure) return ''; // Empty is valid
     
@@ -92,15 +70,6 @@ const AdvancedSearch = ({ onSearch, onReset, onClose }) => {
       }));
     }
     
-    // Validate DOJ field
-    if (field === 'doj') {
-      const error = validateDOJ(value);
-      setErrors(prev => ({
-        ...prev,
-        doj: error
-      }));
-    }
-    
     // Validate tenure field
     if (field === 'tenure') {
       const error = validateTenure(value);
@@ -122,13 +91,6 @@ const AdvancedSearch = ({ onSearch, onReset, onClose }) => {
           return; // Don't search if any field has insufficient characters
         }
       }
-    }
-    
-    // Validate DOJ before searching
-    const dojError = validateDOJ(searchFilters.doj);
-    if (dojError) {
-      setErrors(prev => ({ ...prev, doj: dojError }));
-      return; // Don't search if DOJ is invalid
     }
     
     // Validate tenure before searching
@@ -185,16 +147,19 @@ const AdvancedSearch = ({ onSearch, onReset, onClose }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Employee ID */}
         <div className="relative mb-6">
-          <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Employee ID (exact match)"
-            value={searchFilters.employee_id}
-            onChange={(e) => handleInputChange('employee_id', e.target.value)}
-            className={`input-glossy w-full pl-10 ${
-              errors.employee_id ? 'border-red-500 focus:border-red-500' : ''
-            }`}
-          />
+          <label className="block text-sm font-medium text-gray-300 mb-2">Employee ID</label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 z-10" />
+            <input
+              type="text"
+              placeholder="Employee ID (exact match)"
+              value={searchFilters.employee_id}
+              onChange={(e) => handleInputChange('employee_id', e.target.value)}
+              className={`input-glossy w-full pl-10 ${
+                errors.employee_id ? 'border-red-500 focus:border-red-500' : ''
+              }`}
+            />
+          </div>
           {errors.employee_id && (
             <div className="absolute -bottom-5 left-0 text-xs text-red-400">
               {errors.employee_id}
@@ -204,16 +169,19 @@ const AdvancedSearch = ({ onSearch, onReset, onClose }) => {
 
         {/* Name */}
         <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Employee Name (partial match)"
-            value={searchFilters.name}
-            onChange={(e) => handleInputChange('name', e.target.value)}
-            className={`input-glossy w-full pl-10 ${
-              errors.name ? 'border-red-500 focus:border-red-500' : ''
-            }`}
-          />
+          <label className="block text-sm font-medium text-gray-300 mb-2">Employee Name</label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 z-10" />
+            <input
+              type="text"
+              placeholder="Employee Name (partial match)"
+              value={searchFilters.name}
+              onChange={(e) => handleInputChange('name', e.target.value)}
+              className={`input-glossy w-full pl-10 ${
+                errors.name ? 'border-red-500 focus:border-red-500' : ''
+              }`}
+            />
+          </div>
           {errors.name && (
             <div className="absolute -bottom-5 left-0 text-xs text-red-400">
               {errors.name}
@@ -223,16 +191,19 @@ const AdvancedSearch = ({ onSearch, onReset, onClose }) => {
 
         {/* Reporting To */}
         <div className="relative mb-6">
-          <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Reporting To (partial match)"
-            value={searchFilters.reporting_to}
-            onChange={(e) => handleInputChange('reporting_to', e.target.value)}
-            className={`input-glossy w-full pl-10 ${
-              errors.reporting_to ? 'border-red-500 focus:border-red-500' : ''
-            }`}
-          />
+          <label className="block text-sm font-medium text-gray-300 mb-2">Reporting To</label>
+          <div className="relative">
+            <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 z-10" />
+            <input
+              type="text"
+              placeholder="Reporting To (partial match)"
+              value={searchFilters.reporting_to}
+              onChange={(e) => handleInputChange('reporting_to', e.target.value)}
+              className={`input-glossy w-full pl-10 ${
+                errors.reporting_to ? 'border-red-500 focus:border-red-500' : ''
+              }`}
+            />
+          </div>
           {errors.reporting_to && (
             <div className="absolute -bottom-5 left-0 text-xs text-red-400">
               {errors.reporting_to}
@@ -242,16 +213,19 @@ const AdvancedSearch = ({ onSearch, onReset, onClose }) => {
 
         {/* VP India */}
         <div className="relative mb-6">
-          <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="VP India (partial match)"
-            value={searchFilters.vp_india}
-            onChange={(e) => handleInputChange('vp_india', e.target.value)}
-            className={`input-glossy w-full pl-10 ${
-              errors.vp_india ? 'border-red-500 focus:border-red-500' : ''
-            }`}
-          />
+          <label className="block text-sm font-medium text-gray-300 mb-2">VP India</label>
+          <div className="relative">
+            <Building2 className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 z-10" />
+            <input
+              type="text"
+              placeholder="VP India (partial match)"
+              value={searchFilters.vp_india}
+              onChange={(e) => handleInputChange('vp_india', e.target.value)}
+              className={`input-glossy w-full pl-10 ${
+                errors.vp_india ? 'border-red-500 focus:border-red-500' : ''
+              }`}
+            />
+          </div>
           {errors.vp_india && (
             <div className="absolute -bottom-5 left-0 text-xs text-red-400">
               {errors.vp_india}
@@ -260,19 +234,17 @@ const AdvancedSearch = ({ onSearch, onReset, onClose }) => {
         </div>
 
         {/* DOJ */}
-        <div className="relative mb-6">
-          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Date of Joining (YYYY-MM-DD)"
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-300 mb-2">Date of Joining</label>
+          <CustomDatePicker
             value={searchFilters.doj}
-            onChange={(e) => handleInputChange('doj', e.target.value)}
-            className={`input-glossy w-full pl-10 ${
-              errors.doj ? 'border-red-500 focus:border-red-500' : ''
-            }`}
+            onChange={(value) => handleInputChange('doj', value)}
+            placeholder="Select Date of Joining"
+            maxDate={new Date()} // Restrict to past dates for DOJ
+            className={errors.doj ? 'border-red-500 focus:border-red-500' : ''}
           />
           {errors.doj && (
-            <div className="absolute -bottom-5 left-0 text-xs text-red-400">
+            <div className="text-xs text-red-400 mt-1">
               {errors.doj}
             </div>
           )}
@@ -280,16 +252,19 @@ const AdvancedSearch = ({ onSearch, onReset, onClose }) => {
 
         {/* Tenure */}
         <div className="relative mb-6">
-          <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Tenure (e.g., 2y, 6m, 2y 3m)"
-            value={searchFilters.tenure}
-            onChange={(e) => handleInputChange('tenure', e.target.value)}
-            className={`input-glossy w-full pl-10 ${
-              errors.tenure ? 'border-red-500 focus:border-red-500' : ''
-            }`}
-          />
+          <label className="block text-sm font-medium text-gray-300 mb-2">Tenure</label>
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 z-10" />
+            <input
+              type="text"
+              placeholder="Tenure (e.g., 2y, 6m, 2y 3m)"
+              value={searchFilters.tenure}
+              onChange={(e) => handleInputChange('tenure', e.target.value)}
+              className={`input-glossy w-full pl-10 ${
+                errors.tenure ? 'border-red-500 focus:border-red-500' : ''
+              }`}
+            />
+          </div>
           {errors.tenure && (
             <div className="absolute -bottom-5 left-0 text-xs text-red-400">
               {errors.tenure}
@@ -298,46 +273,55 @@ const AdvancedSearch = ({ onSearch, onReset, onClose }) => {
         </div>
 
         {/* Team */}
-        <CustomSelect
-          value={searchFilters.team}
-          onChange={(value) => handleInputChange('team', value)}
-          options={[
-            { value: "", label: "All Teams" },
-            ...teams.map(team => ({
-              value: team.id.toString(),
-              label: team.team_name
-            }))
-          ]}
-          placeholder="Select Team"
-          className="w-full"
-        />
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-300 mb-2">Team</label>
+          <CustomSelect
+            value={searchFilters.team}
+            onChange={(value) => handleInputChange('team', value)}
+            options={[
+              { value: "", label: "All Teams" },
+              ...teams.map(team => ({
+                value: team.id.toString(),
+                label: team.team_name
+              }))
+            ]}
+            placeholder="Select Team"
+            className="w-full"
+          />
+        </div>
 
         {/* Type */}
-        <CustomSelect
-          value={searchFilters.type}
-          onChange={(value) => handleInputChange('type', value)}
-          options={[
-            { value: "", label: "All Types" },
-            { value: "Full Time", label: "Full Time" },
-            { value: "Intern", label: "Intern" },
-            { value: "Contract", label: "Contract" }
-          ]}
-          placeholder="Select Type"
-          className="w-full"
-        />
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-300 mb-2">Employment Type</label>
+          <CustomSelect
+            value={searchFilters.type}
+            onChange={(value) => handleInputChange('type', value)}
+            options={[
+              { value: "", label: "All Types" },
+              { value: "Full Time", label: "Full Time" },
+              { value: "Intern", label: "Intern" },
+              { value: "Contract", label: "Contract" }
+            ]}
+            placeholder="Select Type"
+            className="w-full"
+          />
+        </div>
 
         {/* Status */}
-        <CustomSelect
-          value={searchFilters.status}
-          onChange={(value) => handleInputChange('status', value)}
-          options={[
-            { value: "", label: "All Status" },
-            { value: "Active", label: "Active" },
-            { value: "Exited", label: "Exited" }
-          ]}
-          placeholder="Select Status"
-          className="w-full"
-        />
+        <div className="mb-6">
+          <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
+          <CustomSelect
+            value={searchFilters.status}
+            onChange={(value) => handleInputChange('status', value)}
+            options={[
+              { value: "", label: "All Status" },
+              { value: "Active", label: "Active" },
+              { value: "Exited", label: "Exited" }
+            ]}
+            placeholder="Select Status"
+            className="w-full"
+          />
+        </div>
       </div>
 
       <div className="flex gap-4 mt-6">

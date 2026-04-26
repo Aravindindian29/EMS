@@ -312,10 +312,36 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             'total_pages': paginator.num_pages,
         })
     
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], url_path='export')
     def export(self, request):
-        format_type = request.query_params.get('format', 'csv')
-        queryset = self.filter_queryset(self.get_queryset())
+        format_type = request.query_params.get('export_format', 'csv')
+        # Get all employees and apply filters manually
+        queryset = Employee.objects.all()
+        
+        # Apply filters similar to the main list view
+        search = request.query_params.get('search', '')
+        type_filter = request.query_params.get('type', '')
+        status_filter = request.query_params.get('status', '')
+        team_filter = request.query_params.get('team', '')
+        
+        if search:
+            queryset = queryset.filter(
+                Q(employee_id__icontains=search) |
+                Q(name__icontains=search) |
+                Q(email__icontains=search) |
+                Q(title__icontains=search) |
+                Q(reporting_to__icontains=search) |
+                Q(vp_india__icontains=search)
+            )
+        
+        if type_filter:
+            queryset = queryset.filter(type=type_filter)
+        
+        if status_filter:
+            queryset = queryset.filter(status=status_filter)
+            
+        if team_filter:
+            queryset = queryset.filter(team_id=team_filter)
         
         if format_type == 'xlsx':
             wb = openpyxl.Workbook()

@@ -64,6 +64,20 @@ class EmployeeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"exit_date": "Exit date is required for exited employees."})
         if attrs.get('status') == 'Exited' and not attrs.get('exit_type'):
             raise serializers.ValidationError({"exit_type": "Exit type is required for exited employees."})
+        
+        # Validate experience_prior_adf is a valid number with max 2 decimal places
+        experience = attrs.get('experience_prior_adf')
+        if experience:
+            # Check if it's a valid number format (allows up to 2 decimal places)
+            import re
+            if not re.match(r'^\d+(\.\d{1,2})?$', experience):
+                raise serializers.ValidationError({"experience_prior_adf": "Experience must be a valid number with up to 2 decimal places."})
+            try:
+                if float(experience) < 0:
+                    raise serializers.ValidationError({"experience_prior_adf": "Experience cannot be negative."})
+            except ValueError:
+                raise serializers.ValidationError({"experience_prior_adf": "Experience must be a valid number."})
+        
         return attrs
 
 class DashboardStatsSerializer(serializers.Serializer):

@@ -105,16 +105,18 @@ function Signup() {
               Username
             </label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                className="input-glossy w-full pl-11"
-                placeholder="johndoe"
-                required
-              />
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleChange}
+                  className="input-glossy w-full pl-11"
+                  placeholder="johndoe"
+                  required
+                />
+              </div>
             </div>
           </div>
 
@@ -123,16 +125,18 @@ function Signup() {
               Email
             </label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className="input-glossy w-full pl-11"
-                placeholder="john@example.com"
-                required
-              />
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  className="input-glossy w-full pl-11"
+                  placeholder="john@example.com"
+                  required
+                />
+              </div>
             </div>
           </div>
 
@@ -142,16 +146,18 @@ function Signup() {
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="input-glossy w-full pl-11"
-                  placeholder="••••••••"
-                  required
-                />
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                  <input
+                    type="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="input-glossy w-full pl-11"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
               </div>
             </div>
 
@@ -160,16 +166,18 @@ function Signup() {
                 Confirm Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="password"
-                  name="password2"
-                  value={formData.password2}
-                  onChange={handleChange}
-                  className="input-glossy w-full pl-11"
-                  placeholder="••••••••"
-                  required
-                />
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
+                  <input
+                    type="password"
+                    name="password2"
+                    value={formData.password2}
+                    onChange={handleChange}
+                    className="input-glossy w-full pl-11"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
               </div>
             </div>
           </div>
