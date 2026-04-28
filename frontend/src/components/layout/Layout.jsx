@@ -5,7 +5,7 @@ import { useState } from 'react';
 function Layout({ user, setIsAuthenticated }) {
   const navigate = useNavigate();
   const location = useLocation();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('access_token');
@@ -30,16 +30,16 @@ function Layout({ user, setIsAuthenticated }) {
     <div className="min-h-screen bg-gradient-to-br from-ironman-darker via-ironman-dark to-black">
       {/* Sidebar */}
       <aside className={`fixed top-0 left-0 h-full bg-gradient-to-b from-ironman-dark/95 to-ironman-darker/95 backdrop-blur-xl border-r border-ironman-red/30 transition-all duration-300 z-50 ${sidebarOpen ? 'w-64' : 'w-20'}`}>
-        <div className="p-6">
-          <div className={`flex items-center mb-8 ${sidebarOpen ? 'justify-between' : 'justify-center'}`}>
+        <div className="p-6 overflow-hidden">
+          <div className={`flex items-center mb-8 ${sidebarOpen ? 'justify-between' : 'justify-center'} min-w-0`}>
             {sidebarOpen && (
-              <h1 className="text-xl font-bold bg-gradient-to-r from-ironman-red to-ironman-gold bg-clip-text text-transparent flex-shrink-0 max-w-[120px] truncate">
+              <h1 className="text-xl font-bold bg-gradient-to-r from-ironman-red to-ironman-gold bg-clip-text text-transparent flex-shrink-0 max-w-[120px] truncate min-w-0">
                 EMS Pro
               </h1>
             )}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-lg hover:bg-ironman-red/20 transition-colors flex-shrink-0"
+              className="p-2 rounded-lg hover:bg-ironman-red/20 transition-colors flex-shrink-0 ml-auto"
             >
               {sidebarOpen ? <X className="w-5 h-5 text-ironman-gold" /> : <Menu className="w-5 h-5 text-ironman-gold" />}
             </button>

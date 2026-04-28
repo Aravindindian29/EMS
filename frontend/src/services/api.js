@@ -70,6 +70,7 @@ export const employeeAPI = {
   update: (id, data) => api.put(`/employees/${id}/`, data),
   delete: (id) => api.delete(`/employees/${id}/`),
   advancedSearch: (params) => api.get('/employees/advanced-search/', { params }),
+  getByExitQuarter: (quarter) => api.get('/employees/by_exit_quarter/', { params: { quarter } }),
   import: (file) => {
     const formData = new FormData();
     formData.append('file', file);

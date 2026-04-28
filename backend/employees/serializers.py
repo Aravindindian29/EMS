@@ -91,4 +91,3 @@ class ExitTrendSerializer(serializers.Serializer):
     voluntary_exits = serializers.IntegerField()
     terminations = serializers.IntegerField()
     total_exits = serializers.IntegerField()
-    difference = serializers.IntegerField()

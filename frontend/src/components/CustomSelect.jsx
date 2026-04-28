@@ -19,16 +19,48 @@ const CustomSelect = ({
 
   const selectedOption = options.find(option => option.value === value);
 
+  // Helper function to calculate dropdown height based on options
+  const calculateDropdownHeight = useCallback(() => {
+    const optionHeight = 48; // Approximate height per option (px-4 py-3 = 48px)
+    const maxDropdownHeight = 240; // max-h-60 in pixels
+    const actualHeight = Math.min(options.length * optionHeight, maxDropdownHeight);
+    return actualHeight;
+  }, [options.length]);
+
   const updateDropdownPosition = useCallback(() => {
     if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
+      const dropdownHeight = calculateDropdownHeight();
+      
+      // Calculate available space
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      
+      // Determine optimal direction with boundary checks
+      let topPosition;
+      if (spaceBelow >= dropdownHeight) {
+        // Enough space below, open downward
+        topPosition = rect.bottom;
+      } else if (spaceAbove >= dropdownHeight && spaceAbove > spaceBelow) {
+        // More space above and enough to fit, open upward
+        topPosition = rect.top - dropdownHeight;
+      } else {
+        // Not enough space in either direction, choose the one with more space
+        // and clamp to viewport bounds
+        if (spaceBelow > spaceAbove) {
+          topPosition = rect.bottom;
+        } else {
+          topPosition = Math.max(0, rect.top - dropdownHeight);
+        }
+      }
+      
       setDropdownPosition({
-        top: rect.bottom,
+        top: topPosition,
         left: rect.left,
         width: rect.width
       });
     }
-  }, []);
+  }, [calculateDropdownHeight]);
 
   const handleToggle = useCallback(() => {
     if (!disabled) {

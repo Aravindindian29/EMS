@@ -1,13 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { exitTrendAPI } from '../services/api';
 import { BarChart, Bar, PieChart, Pie, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import { Calendar, TrendingDown, Download } from 'lucide-react';
 import CustomSelect from '../components/CustomSelect';
+import ExitDetailsModal from '../components/ExitDetailsModal';
 
 function ExitTrends() {
   const [trends, setTrends] = useState([]);
   const [year, setYear] = useState(new Date().getFullYear());
   const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedQuarter, setSelectedQuarter] = useState(null);
+
+  const yearOptions = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+    const startYear = 2020;
+    const endYear = currentYear;
+    const options = [];
+    for (let y = startYear; y <= endYear; y++) {
+      options.push({ value: y.toString(), label: y.toString() });
+    }
+    return options;
+  }, []);
 
   useEffect(() => {
     fetchTrends();
@@ -25,9 +39,14 @@ function ExitTrends() {
     }
   };
 
+  const handleQuarterClick = (quarter) => {
+    setSelectedQuarter(quarter);
+    setModalOpen(true);
+  };
+
   const COLORS = {
-    voluntary: '#C8102E',
-    termination: '#FFD700',
+    voluntary: '#FFD700',
+    termination: '#C8102E',
     total: '#8B0000',
   };
 
@@ -45,7 +64,22 @@ function ExitTrends() {
     return acc;
   }, []);
 
-  const PIE_COLORS = ['#C8102E', '#FFD700'];
+  const PIE_COLORS = ['#FFD700', '#C8102E'];
+
+  const CustomTooltip = ({ active, payload }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-[#1A1A1A] border border-[#C8102E] rounded-lg p-3">
+          {payload.map((entry, index) => (
+            <p key={index} style={{ color: entry.name === 'Termination' ? '#C8102E' : '#FFD700', fontWeight: 'bold' }}>
+              {entry.name}: {entry.value}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
 
   if (loading) {
     return (
@@ -69,11 +103,7 @@ function ExitTrends() {
             <CustomSelect
               value={year.toString()}
               onChange={(value) => setYear(Number(value))}
-              options={[
-                { value: '2024', label: '2024' },
-                { value: '2025', label: '2025' },
-                { value: '2026', label: '2026' }
-              ]}
+              options={yearOptions}
               placeholder="Select Year"
             />
           </div>
@@ -90,25 +120,21 @@ function ExitTrends() {
                 <th>Voluntary Exits</th>
                 <th>Terminations</th>
                 <th>Total Exits</th>
-                <th>Difference (V - T)</th>
               </tr>
             </thead>
             <tbody>
               {trends.map((trend) => (
-                <tr key={trend.quarter}>
-                  <td className="font-semibold text-ironman-gold">{trend.quarter}</td>
-                  <td className="text-ironman-red font-bold">{trend.voluntary_exits}</td>
-                  <td className="text-ironman-gold font-bold">{trend.terminations}</td>
-                  <td className="text-white font-bold">{trend.total_exits}</td>
-                  <td>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      trend.difference > 0 ? 'bg-ironman-red/20 text-ironman-red' : 
-                      trend.difference < 0 ? 'bg-ironman-gold/20 text-ironman-gold' :
-                      'bg-gray-500/20 text-gray-400'
-                    }`}>
-                      {trend.difference > 0 ? '+' : ''}{trend.difference}
-                    </span>
+                <tr 
+                  key={trend.quarter}
+                  className="cursor-pointer hover:bg-ironman-red/10 transition-colors"
+                  onClick={() => handleQuarterClick(trend.quarter)}
+                >
+                  <td className="font-semibold text-ironman-gold transition-colors">
+                    {trend.quarter}
                   </td>
+                  <td className="text-ironman-gold font-bold">{trend.voluntary_exits}</td>
+                  <td className="text-ironman-red font-bold">{trend.terminations}</td>
+                  <td className="text-white font-bold">{trend.total_exits}</td>
                 </tr>
               ))}
             </tbody>
@@ -130,6 +156,7 @@ function ExitTrends() {
               <XAxis dataKey="quarter" stroke="#FFD700" />
               <YAxis stroke="#FFD700" />
               <Tooltip 
+                cursor={{ stroke: '#C8102E', strokeWidth: 2, fill: '#C8102E', fillOpacity: 0.1 }}
                 contentStyle={{ 
                   backgroundColor: '#1A1A1A', 
                   border: '1px solid #C8102E',
@@ -138,8 +165,8 @@ function ExitTrends() {
                 }}
               />
               <Legend />
-              <Bar dataKey="voluntary_exits" fill="#C8102E" name="Voluntary Exits" radius={[8, 8, 0, 0]} />
-              <Bar dataKey="terminations" fill="#FFD700" name="Terminations" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="voluntary_exits" fill="#FFD700" name="Voluntary Exits" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="terminations" fill="#C8102E" name="Terminations" radius={[8, 8, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
@@ -163,48 +190,18 @@ function ExitTrends() {
                   <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: '#1A1A1A', 
-                  border: '1px solid #C8102E',
-                  borderRadius: '8px',
-                  color: '#FFD700'
-                }}
-              />
+              <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Difference Line Chart */}
-      <div className="glossy-card p-6">
-        <h2 className="text-2xl font-bold text-ironman-gold mb-6">Voluntary vs Termination Difference</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={trends}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#C8102E20" />
-            <XAxis dataKey="quarter" stroke="#FFD700" />
-            <YAxis stroke="#FFD700" />
-            <Tooltip 
-              contentStyle={{ 
-                backgroundColor: '#1A1A1A', 
-                border: '1px solid #C8102E',
-                borderRadius: '8px',
-                color: '#FFD700'
-              }}
-            />
-            <Legend />
-            <Line 
-              type="monotone" 
-              dataKey="difference" 
-              stroke="#C8102E" 
-              strokeWidth={3}
-              dot={{ fill: '#FFD700', r: 6 }}
-              activeDot={{ r: 8 }}
-              name="Difference (V - T)"
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      <ExitDetailsModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        quarter={selectedQuarter}
+      />
+
     </div>
   );
 }

@@ -206,7 +206,7 @@ option:hover {
   }
   
   .table-glossy th {
-    @apply px-6 py-4 text-center text-sm font-semibold text-ironman-gold border-b border-ironman-red/30;
+    @apply px-6 py-3 text-center text-sm font-semibold text-ironman-gold border-b border-ironman-red/30;
   }
   
   .table-glossy tbody tr {

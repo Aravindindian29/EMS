@@ -135,10 +135,10 @@ const AdvancedSearch = ({ onSearch, onReset, onClose }) => {
           {onClose && (
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-red-400 transition-colors"
+              className="p-2 hover:bg-ironman-red/20 rounded-lg transition-colors"
               title="Close Advanced Search"
             >
-              <X className="w-5 h-5" />
+              <X className="w-6 h-6 text-ironman-gold" />
             </button>
           )}
         </div>

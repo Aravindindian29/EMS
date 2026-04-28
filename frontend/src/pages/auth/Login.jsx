@@ -50,9 +50,8 @@ function Login({ setIsAuthenticated, setUser }) {
             <Shield className="w-10 h-10 text-ironman-gold" />
           </div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-ironman-red via-ironman-gold to-ironman-red bg-clip-text text-transparent">
-            Employee Management
+            Employee Management System
           </h1>
-          <p className="text-gray-400 mt-2">Professional Edition</p>
         </div>
 
         {error && (
