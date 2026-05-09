@@ -777,7 +777,7 @@ class TeamViewSet(viewsets.ModelViewSet):
 
     filter_backends = [filters.SearchFilter]
 
-    search_fields = ['team_name', 'us_team_head', 'india_head']
+    search_fields = ['team_name']
 
     
 
@@ -788,6 +788,44 @@ class TeamViewSet(viewsets.ModelViewSet):
             return [IsAdminUser()]
 
         return [IsAuthenticated()]
+
+    
+
+    def list(self, request, *args, **kwargs):
+
+        search_query = request.query_params.get('search', '').strip()
+
+        
+
+        # Get all teams
+
+        all_teams = Team.objects.all()
+
+        serializer = self.get_serializer(all_teams, many=True)
+
+        
+
+        # Add highlighted field to each team
+
+        data = serializer.data
+
+        for team_data in data:
+
+            if search_query:
+
+                # Case-insensitive search match
+
+                team_data['highlighted'] = search_query.lower() in team_data['team_name'].lower()
+
+            else:
+
+                # No search query, all teams are highlighted
+
+                team_data['highlighted'] = True
+
+        
+
+        return Response({'results': data, 'all_teams': data})
 
     
 

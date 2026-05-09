@@ -79,6 +79,7 @@ class Employee(models.Model):
     experience_prior_adf = models.CharField(max_length=10, help_text="Years of experience")
     exit_date = models.DateField(null=True, blank=True)
     exit_type = models.CharField(max_length=20, choices=EXIT_TYPE_CHOICES, blank=True, default='')
+    exit_reason = models.TextField(max_length=250, null=True, blank=True, help_text="Reason for exit (max 250 characters)")
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):

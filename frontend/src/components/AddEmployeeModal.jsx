@@ -19,6 +19,7 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
     vp_india: '',
     exit_date: '',
     exit_type: '',
+    exit_reason: '',
   });
 
   const [teams, setTeams] = useState([]);
@@ -50,6 +51,7 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
         vp_india: employeeData.vp_india || '',
         exit_date: employeeData.exit_date || '',
         exit_type: employeeData.exit_type || '',
+        exit_reason: employeeData.exit_reason || '',
       });
       if (employeeData.date_of_joining) {
         calculateTenure(employeeData.date_of_joining);
@@ -70,6 +72,7 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
         vp_india: '',
         exit_date: '',
         exit_type: '',
+        exit_reason: '',
       });
       setTenure('');
     }
@@ -120,18 +123,20 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
   const handleChange = (field, value) => {
     // If status is being changed from "Exited" to something else, clear exit-related fields
     if (field === 'status' && formData.status === 'Exited' && value !== 'Exited') {
-      setFormData(prev => ({ 
-        ...prev, 
+      setFormData(prev => ({
+        ...prev,
         [field]: value,
         exit_date: '',
-        exit_type: ''
+        exit_type: '',
+        exit_reason: ''
       }));
       // Clear errors for exit fields as well
-      setErrors(prev => ({ 
-        ...prev, 
-        [field]: '', 
-        exit_date: '', 
-        exit_type: '' 
+      setErrors(prev => ({
+        ...prev,
+        [field]: '',
+        exit_date: '',
+        exit_type: '',
+        exit_reason: ''
       }));
     } else {
       setFormData(prev => ({ ...prev, [field]: value }));
@@ -165,6 +170,7 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
     if (formData.status === 'Exited') {
       if (!formData.exit_date) newErrors.exit_date = 'Exit date is required for exited employees';
       if (!formData.exit_type) newErrors.exit_type = 'Exit type is required for exited employees';
+      if (!formData.exit_reason.trim()) newErrors.exit_reason = 'Exit reason is required for exited employees';
     }
     
     // Type and status are no longer required since None is a valid option
@@ -190,6 +196,7 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
         vp_india: formData.vp_india || null,
         exit_date: formData.exit_date || null,
         exit_type: formData.exit_type || '',
+        exit_reason: formData.exit_reason || '',
       };
 
       if (mode === 'edit') {
@@ -237,6 +244,7 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
       vp_india: '',
       exit_date: '',
       exit_type: '',
+      exit_reason: '',
     });
     setTenure('');
     setErrors({});
@@ -508,6 +516,31 @@ function AddEmployeeModal({ isOpen, onClose, onSuccess, mode = 'add', employeeDa
                   placeholder="Select VP India"
                 />
               </div>
+
+              {formData.status === 'Exited' && (
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-semibold text-gray-300 mb-2">
+                    Reason <span className="text-ironman-red">*</span>
+                  </label>
+                  <textarea
+                    value={formData.exit_reason}
+                    onChange={(e) => {
+                      if (e.target.value.length <= 250) {
+                        handleChange('exit_reason', e.target.value);
+                      }
+                    }}
+                    className="input-glossy w-full min-h-[80px] resize-y"
+                    placeholder="Enter exit reason (max 250 characters)"
+                    maxLength="250"
+                  />
+                  <div className="flex justify-between items-center mt-1">
+                    {errors.exit_reason && <p className="text-red-400 text-sm">{errors.exit_reason}</p>}
+                    <p className="text-gray-400 text-sm ml-auto">
+                      {formData.exit_reason.length}/250 characters
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-4 pt-6">

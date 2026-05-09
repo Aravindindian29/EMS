@@ -1,26 +1,44 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { teamAPI } from '../services/api';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 import { Users, Search, Download } from 'lucide-react';
 
 function TeamWiseCount() {
-  const [teams, setTeams] = useState([]);
+  const [allTeams, setAllTeams] = useState([]);
+  const [filteredTeams, setFilteredTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     fetchTeams();
   }, [search]);
 
   const fetchTeams = async () => {
-    setLoading(true);
+    if (!isInitialLoad) {
+      setLoading(false); // Don't show loading state during search
+    }
     try {
       const response = await teamAPI.getAll({ search });
-      setTeams(response.data.results || response.data);
+      const data = response.data.results || response.data;
+      const allTeamsData = response.data.all_teams || data;
+      
+      // Set all teams for the chart
+      setAllTeams(allTeamsData);
+      
+      // Set filtered teams for the table (only highlighted ones)
+      const filtered = allTeamsData.filter(team => team.highlighted);
+      setFilteredTeams(filtered);
     } catch (error) {
       console.error('Error fetching teams:', error);
     } finally {
       setLoading(false);
+      setIsInitialLoad(false);
+      // Restore focus after data update
+      if (inputRef.current && document.activeElement !== inputRef.current) {
+        inputRef.current.focus();
+      }
     }
   };
 
@@ -39,14 +57,6 @@ function TeamWiseCount() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <div className="loading-spinner"></div>
-      </div>
-    );
-  }
-
   return (
     <div>
       <div className="mb-8 flex items-center justify-between">
@@ -62,10 +72,12 @@ function TeamWiseCount() {
       <div className="glossy-card p-6 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
             <input
+              key="search-input"
+              ref={inputRef}
               type="text"
-              placeholder="Search teams..."
+              placeholder="Search teams"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="input-glossy w-full pl-11"
@@ -83,32 +95,38 @@ function TeamWiseCount() {
 
       {/* Table */}
       <div className="glossy-card overflow-hidden mb-6">
-        <div className="overflow-x-auto">
-          <table className="table-glossy">
-            <thead>
-              <tr>
-                <th>US Team Head</th>
-                <th>India Head</th>
-                <th>Team Name</th>
-                <th>Employee Count</th>
-              </tr>
-            </thead>
-            <tbody>
-              {teams.map((team) => (
-                <tr key={team.id}>
-                  <td className="font-semibold">{team.us_team_head}</td>
-                  <td className="font-semibold">{team.india_head}</td>
-                  <td className="text-ironman-gold font-bold">{team.team_name}</td>
-                  <td>
-                    <span className="px-4 py-2 bg-gradient-to-r from-ironman-red/20 to-ironman-gold/20 rounded-full text-white font-bold">
-                      {team.employee_count}
-                    </span>
-                  </td>
+        {filteredTeams.length === 0 && search ? (
+          <div className="flex items-center justify-center h-48">
+            <p className="text-ironman-gold text-xl font-semibold">No Result Found</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table-glossy">
+              <thead>
+                <tr>
+                  <th>US Team Head</th>
+                  <th>India Head</th>
+                  <th>Team Name</th>
+                  <th>Employee Count</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filteredTeams.map((team) => (
+                  <tr key={team.id}>
+                    <td className="font-semibold">{team.us_team_head}</td>
+                    <td className="font-semibold">{team.india_head}</td>
+                    <td className="text-ironman-gold font-bold">{team.team_name}</td>
+                    <td>
+                      <span className="px-4 py-2 bg-gradient-to-r from-ironman-red/20 to-ironman-gold/20 rounded-full text-white font-bold">
+                        {team.employee_count}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Bar Chart */}
@@ -118,11 +136,12 @@ function TeamWiseCount() {
           Team Distribution
         </h2>
         <ResponsiveContainer width="100%" height={400}>
-          <BarChart data={teams} layout="vertical">
+          <BarChart data={allTeams} layout="vertical">
             <CartesianGrid strokeDasharray="3 3" stroke="#C8102E20" />
             <XAxis type="number" stroke="#FFD700" />
             <YAxis dataKey="team_name" type="category" stroke="#FFD700" width={150} />
             <Tooltip 
+              cursor={{ stroke: '#C8102E', strokeWidth: 2, fill: '#C8102E', fillOpacity: 0.1 }}
               contentStyle={{ 
                 backgroundColor: '#1A1A1A', 
                 border: '1px solid #C8102E',
@@ -131,12 +150,19 @@ function TeamWiseCount() {
               }}
             />
             <Legend />
-            <Bar 
-              dataKey="employee_count" 
-              fill="url(#colorGradient)" 
+            <Bar
+              dataKey="employee_count"
+              fill="url(#colorGradient)"
               name="Employee Count"
               radius={[0, 8, 8, 0]}
-            />
+            >
+              {allTeams.map((entry, index) => (
+                <Cell 
+                  key={`cell-${index}`} 
+                  fillOpacity={entry.highlighted ? 1 : 0.3}
+                />
+              ))}
+            </Bar>
             <defs>
               <linearGradient id="colorGradient" x1="0" y1="0" x2="1" y2="0">
                 <stop offset="0%" stopColor="#C8102E" />

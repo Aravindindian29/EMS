@@ -181,7 +181,7 @@ const EmployeeDetailsModal = ({ isOpen, onClose, employeeData }) => {
               <LogOut className="w-5 h-5 text-red-400" />
               Exit Information
             </h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="bg-ironman-dark/40 border border-red-500/30 rounded-xl p-4">
                 <p className="text-red-400 text-sm font-semibold mb-2">Exit Date</p>
                 <p className="text-white">{formatDate(employeeData.exit_date)}</p>
@@ -194,6 +194,10 @@ const EmployeeDetailsModal = ({ isOpen, onClose, employeeData }) => {
                 <p className="text-red-400 text-sm font-semibold mb-2">Exit Quarter</p>
                 <p className="text-white">{employeeData.exit_quarter || 'N/A'}</p>
               </div>
+            </div>
+            <div className="bg-ironman-dark/40 border border-red-500/30 rounded-xl p-4">
+              <p className="text-red-400 text-sm font-semibold mb-2">Exit Reason</p>
+              <p className="text-white">{employeeData.exit_reason || 'N/A'}</p>
             </div>
           </div>
         )}

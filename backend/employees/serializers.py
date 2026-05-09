@@ -56,7 +56,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
             'id', 'employee_id', 'title', 'name', 'email', 'date_of_joining',
             'tenure_at_adf', 'experience_prior_adf', 'type', 'status',
             'reporting_to', 'team', 'team_name', 'vp_india', 'exit_date',
-            'exit_type', 'exit_quarter', 'created_at'
+            'exit_type', 'exit_reason', 'exit_quarter', 'created_at'
         )
     
     def validate(self, attrs):
@@ -64,6 +64,8 @@ class EmployeeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"exit_date": "Exit date is required for exited employees."})
         if attrs.get('status') == 'Exited' and not attrs.get('exit_type'):
             raise serializers.ValidationError({"exit_type": "Exit type is required for exited employees."})
+        if attrs.get('status') == 'Exited' and not attrs.get('exit_reason'):
+            raise serializers.ValidationError({"exit_reason": "Exit reason is required for exited employees."})
         
         # Validate experience_prior_adf is a valid number with max 2 decimal places
         experience = attrs.get('experience_prior_adf')
