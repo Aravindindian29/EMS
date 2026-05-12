@@ -310,7 +310,7 @@ function ActiveEmployees({ user }) {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 z-10" />
                 <input
                   type="text"
-                  placeholder="Search employees..."
+                  placeholder="Search Employees"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="input-glossy w-full pl-11"

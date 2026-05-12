@@ -1,5 +1,5 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, TrendingDown, Network, Settings, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, TrendingDown, Network, Settings, LogOut, Menu, X, User } from 'lucide-react';
 import { useState } from 'react';
 
 function Layout({ user, setIsAuthenticated }) {
@@ -65,19 +65,22 @@ function Layout({ user, setIsAuthenticated }) {
 
         <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-ironman-red/30">
           <div className={`flex flex-col gap-4 ${!sidebarOpen ? 'items-center' : ''}`}>
-            <div className={`flex items-center gap-3 ${!sidebarOpen ? 'justify-center' : ''}`}>
+            <button
+              onClick={() => navigate('/profile')}
+              className={`flex items-center gap-3 ${!sidebarOpen ? 'justify-center' : ''} w-full p-2 rounded-lg hover:bg-ironman-red/20 transition-colors cursor-pointer`}
+            >
               <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-ironman-red to-ironman-gold flex items-center justify-center text-white font-bold shadow-glossy">
                 {user?.first_name?.[0]}{user?.last_name?.[0]}
               </div>
               {sidebarOpen && (
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-white truncate">
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-semibold text-white truncate text-left">
                     {user?.first_name} {user?.last_name}
                   </p>
-                  <p className="text-xs text-ironman-gold truncate capitalize">{user?.role}</p>
+                  <p className="text-xs text-ironman-gold truncate capitalize text-left">{user?.role}</p>
                 </div>
               )}
-            </div>
+            </button>
             <button
               onClick={handleLogout}
               className={`sidebar-link w-full ${!sidebarOpen ? 'justify-center' : ''} hover:bg-red-500/20`}

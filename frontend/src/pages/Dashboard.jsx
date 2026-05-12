@@ -139,24 +139,32 @@ function Dashboard() {
         </div>
 
         <div className="glossy-card p-6">
-          <h2 className="text-2xl font-bold text-ironman-gold mb-4">System Overview</h2>
+          <h2 className="text-2xl font-bold text-ironman-gold mb-4">Exit Overview</h2>
           <div className="space-y-4">
             <div className="p-4 bg-gradient-to-r from-ironman-red/10 to-ironman-gold/10 rounded-lg border border-ironman-gold/20">
-              <p className="text-sm text-gray-400 mb-1">Total Active Employees</p>
-              <p className="text-3xl font-bold text-white">{stats?.total_count || 0}</p>
+              <p className="text-sm text-gray-400 mb-1">Total Exited Employees</p>
+              <p className="text-3xl font-bold text-white">{stats?.exited_count || 0}</p>
             </div>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-4 gap-4">
               <div className="text-center p-3 bg-ironman-dark/50 rounded-lg">
-                <p className="text-2xl font-bold text-ironman-red">{stats?.full_time_count || 0}</p>
-                <p className="text-xs text-gray-400 mt-1">Full Time</p>
+                <p className="text-2xl font-bold text-ironman-gold">{stats?.voluntary_count || 0}</p>
+                <p className="text-xs text-gray-400 mt-1">Voluntary</p>
               </div>
               <div className="text-center p-3 bg-ironman-dark/50 rounded-lg">
-                <p className="text-2xl font-bold text-ironman-gold">{stats?.intern_count || 0}</p>
-                <p className="text-xs text-gray-400 mt-1">Interns</p>
+                <p className="text-2xl font-bold text-ironman-red">{stats?.termination_count || 0}</p>
+                <p className="text-xs text-gray-400 mt-1">Terminations</p>
               </div>
               <div className="text-center p-3 bg-ironman-dark/50 rounded-lg">
-                <p className="text-2xl font-bold text-purple-400">{stats?.contract_count || 0}</p>
-                <p className="text-xs text-gray-400 mt-1">Contract</p>
+                <p className="text-2xl font-bold text-purple-400">
+                  {stats?.exited_count > 0 ? ((stats?.voluntary_count / stats?.exited_count) * 100).toFixed(1) : 0}%
+                </p>
+                <p className="text-xs text-gray-400 mt-1">Voluntary %</p>
+              </div>
+              <div className="text-center p-3 bg-ironman-dark/50 rounded-lg">
+                <p className="text-2xl font-bold text-orange-400">
+                  {stats?.exited_count > 0 ? ((stats?.termination_count / stats?.exited_count) * 100).toFixed(1) : 0}%
+                </p>
+                <p className="text-xs text-gray-400 mt-1">Termination %</p>
               </div>
             </div>
           </div>

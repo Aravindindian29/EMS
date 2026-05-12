@@ -87,9 +87,38 @@ class DashboardStatsSerializer(serializers.Serializer):
     intern_count = serializers.IntegerField()
     contract_count = serializers.IntegerField()
     total_count = serializers.IntegerField()
+    exited_count = serializers.IntegerField()
+    voluntary_count = serializers.IntegerField()
+    termination_count = serializers.IntegerField()
 
 class ExitTrendSerializer(serializers.Serializer):
     quarter = serializers.CharField()
     voluntary_exits = serializers.IntegerField()
     terminations = serializers.IntegerField()
     total_exits = serializers.IntegerField()
+
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('first_name', 'last_name')
+        extra_kwargs = {
+            'first_name': {'required': False, 'max_length': 50},
+            'last_name': {'required': False, 'max_length': 50}
+        }
+    
+    def validate_first_name(self, value):
+        import re
+        if value and not re.match(r'^[a-zA-Z\s\'-]+$', value):
+            raise serializers.ValidationError("First name can only contain letters, spaces, hyphens, and apostrophes.")
+        return value
+    
+    def validate_last_name(self, value):
+        import re
+        if value and not re.match(r'^[a-zA-Z\s\'-]+$', value):
+            raise serializers.ValidationError("Last name can only contain letters, spaces, hyphens, and apostrophes.")
+        return value
+    
+    def validate(self, attrs):
+        if not attrs.get('first_name') and not attrs.get('last_name'):
+            raise serializers.ValidationError("At least one field (first_name or last_name) must be provided.")
+        return attrs

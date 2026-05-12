@@ -36,7 +36,7 @@ from .serializers import (
 
     VPIndiaSerializer, ReportingManagerSerializer,
 
-    DashboardStatsSerializer, ExitTrendSerializer
+    DashboardStatsSerializer, ExitTrendSerializer, UserProfileUpdateSerializer
 
 )
 
@@ -152,6 +152,86 @@ def password_reset_confirm(request):
 
 
 
+@api_view(['POST'])
+
+@permission_classes([IsAuthenticated])
+
+def change_password(request):
+
+    user = request.user
+
+    current_password = request.data.get('current_password')
+
+    new_password = request.data.get('new_password')
+
+    
+
+    if not current_password or not new_password:
+
+        return Response({'error': 'Both current and new password are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+    
+
+    if not user.check_password(current_password):
+
+        return Response({'error': 'Current password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+
+    
+
+    try:
+
+        from django.contrib.auth.password_validation import validate_password
+
+        validate_password(new_password, user)
+
+    except Exception as e:
+
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    
+
+    user.set_password(new_password)
+
+    user.save()
+
+    
+
+    return Response({'message': 'Password changed successfully'})
+
+
+
+@api_view(['GET'])
+
+@permission_classes([IsAuthenticated])
+
+def get_profile(request):
+
+    serializer = UserSerializer(request.user)
+
+    return Response(serializer.data)
+
+
+
+@api_view(['PATCH'])
+
+@permission_classes([IsAuthenticated])
+
+def update_profile(request):
+
+    user = request.user
+
+    serializer = UserProfileUpdateSerializer(user, data=request.data, partial=True)
+
+    if serializer.is_valid():
+
+        serializer.save()
+
+        return Response(serializer.data)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 @api_view(['GET'])
 
 @permission_classes([IsAuthenticated])
@@ -159,6 +239,8 @@ def password_reset_confirm(request):
 def dashboard_stats(request):
 
     active_employees = Employee.objects.filter(status='Active')
+
+    exited_employees = Employee.objects.filter(status='Exited')
 
     
 
@@ -171,6 +253,12 @@ def dashboard_stats(request):
         'contract_count': active_employees.filter(type='Contract').count(),
 
         'total_count': active_employees.count(),
+
+        'exited_count': exited_employees.count(),
+
+        'voluntary_count': exited_employees.filter(exit_type='Voluntary').count(),
+
+        'termination_count': exited_employees.filter(exit_type='Termination').count(),
 
     }
 

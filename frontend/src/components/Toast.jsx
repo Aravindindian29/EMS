@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle, X } from 'lucide-react';
+import { createRoot } from 'react-dom/client';
 
 const Toast = ({ message, type = 'success', duration = 4000, onClose }) => {
   const [isVisible, setIsVisible] = useState(true);
@@ -71,3 +72,28 @@ const Toast = ({ message, type = 'success', duration = 4000, onClose }) => {
 };
 
 export default Toast;
+
+export const showToast = (message, type = 'success', duration = 4000) => {
+  // Create a container for the toast
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+
+  // Create a root for React
+  const root = createRoot(container);
+
+  // Function to remove the toast
+  const removeToast = () => {
+    root.unmount();
+    document.body.removeChild(container);
+  };
+
+  // Render the Toast component
+  root.render(
+    <Toast 
+      message={message} 
+      type={type} 
+      duration={duration} 
+      onClose={removeToast} 
+    />
+  );
+};

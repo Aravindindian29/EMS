@@ -57,6 +57,9 @@ export const authAPI = {
   login: (data) => api.post('/auth/login/', data),
   passwordReset: (email) => api.post('/auth/password-reset/', { email }),
   passwordResetConfirm: (data) => api.post('/auth/password-reset/confirm/', data),
+  changePassword: (data) => api.post('/auth/change-password/', data),
+  getProfile: () => api.get('/auth/profile/'),
+  updateProfile: (data) => api.patch('/auth/profile/update/', data),
 };
 
 export const dashboardAPI = {

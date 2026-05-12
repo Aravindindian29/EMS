@@ -77,7 +77,7 @@ function TeamWiseCount() {
               key="search-input"
               ref={inputRef}
               type="text"
-              placeholder="Search teams"
+              placeholder="Search Teams"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="input-glossy w-full pl-11"
