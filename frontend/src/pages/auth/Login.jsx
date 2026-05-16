@@ -9,18 +9,42 @@ function Login({ setIsAuthenticated, setUser }) {
     username: '',
     password: '',
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState(() => localStorage.getItem('loginError') || '');
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError('');
+    // Clear error from localStorage when user starts typing
+    if (error) {
+      localStorage.removeItem('loginError');
+      setError('');
+    }
+    // Clear field-specific error when user starts typing
+    setFieldErrors({ ...fieldErrors, [e.target.name]: '' });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setFieldErrors({});
+    localStorage.removeItem('loginError');
+
+    // Check for empty required fields
+    const errors = {};
+    if (!formData.username.trim()) {
+      errors.username = 'Username is required';
+    }
+    if (!formData.password) {
+      errors.password = 'Password is required';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await authAPI.login(formData);
@@ -31,7 +55,9 @@ function Login({ setIsAuthenticated, setUser }) {
       setIsAuthenticated(true);
       navigate('/dashboard');
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed. Please check your credentials.');
+      const errorMessage = err.response?.data?.error || 'Login failed. Please check your credentials.';
+      localStorage.setItem('loginError', errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -76,10 +102,12 @@ function Login({ setIsAuthenticated, setUser }) {
                   onChange={handleChange}
                   className="input-glossy w-full pl-11"
                   placeholder="Enter your username"
-                  required
                 />
               </div>
             </div>
+            {fieldErrors.username && (
+              <p className="text-red-400 text-xs mt-0.5">{fieldErrors.username}</p>
+            )}
           </div>
 
           <div>
@@ -96,10 +124,12 @@ function Login({ setIsAuthenticated, setUser }) {
                   onChange={handleChange}
                   className="input-glossy w-full pl-11"
                   placeholder="Enter your password"
-                  required
                 />
               </div>
             </div>
+            {fieldErrors.password && (
+              <p className="text-red-400 text-xs mt-0.5">{fieldErrors.password}</p>
+            )}
           </div>
 
           <div className="flex items-center justify-between text-sm">
@@ -131,11 +161,6 @@ function Login({ setIsAuthenticated, setUser }) {
           </Link>
         </div>
 
-        <div className="mt-8 p-4 bg-ironman-gold/10 border border-ironman-gold/30 rounded-lg">
-          <p className="text-xs text-ironman-gold font-semibold mb-2">Demo Credentials:</p>
-          <p className="text-xs text-gray-300">Admin: admin / admin123</p>
-          <p className="text-xs text-gray-300">User: user / user123</p>
-        </div>
       </div>
     </div>
   );

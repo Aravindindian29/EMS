@@ -74,6 +74,22 @@ option:hover {
   
   .input-glossy {
     @apply bg-ironman-dark/50 border border-ironman-red/30 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-ironman-gold focus:ring-2 focus:ring-ironman-gold/50 transition-all backdrop-blur-sm;
+    caret-color: white;
+  }
+
+  /* Browser autofill styling overrides */
+  .input-glossy:-webkit-autofill,
+  .input-glossy:-webkit-autofill:hover,
+  .input-glossy:-webkit-autofill:focus,
+  .input-glossy:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px rgba(30, 30, 30, 0.5) inset !important;
+    -webkit-text-fill-color: white !important;
+    background-color: rgba(30, 30, 30, 0.5) !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  .input-glossy:-webkit-autofill::first-line {
+    color: white !important;
   }
   
   .input-glossy[type="select"],
@@ -385,8 +401,8 @@ option:hover {
   border: 3px solid rgba(255, 215, 0, 0.1);
   border-top: 3px solid #FFD700;
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 20px;
+  height: 20px;
   animation: spin 1s linear infinite;
 }
 

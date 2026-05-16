@@ -8,7 +8,7 @@ const ToastManager = () => {
     const id = Date.now() + Math.random();
     const newToast = { id, message, type, duration };
     
-    setToasts(prev => [...prev, newToast]);
+    setToasts([newToast]);
   };
 
   const removeToast = (id) => {

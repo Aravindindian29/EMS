@@ -11,11 +11,26 @@ function PasswordReset() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const handleRequestReset = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setFieldErrors({});
+
+    if (!email.trim()) {
+      setFieldErrors({ email: 'Email is required' });
+      setLoading(false);
+      return;
+    } else {
+      const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailPattern.test(email)) {
+        setFieldErrors({ email: 'Please enter a valid email address' });
+        setLoading(false);
+        return;
+      }
+    }
 
     try {
       await authAPI.passwordReset(email);
@@ -87,7 +102,7 @@ function PasswordReset() {
         )}
 
         {step === 1 && (
-          <form onSubmit={handleRequestReset} className="space-y-6">
+          <form onSubmit={handleRequestReset} className="space-y-6" noValidate>
             <div>
               <label className="block text-sm font-medium text-ironman-gold mb-2">
                 Email Address
@@ -101,10 +116,14 @@ function PasswordReset() {
                     onChange={(e) => setEmail(e.target.value)}
                     className="input-glossy w-full pl-11"
                     placeholder="Enter your email"
+                    pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
                     required
                   />
                 </div>
               </div>
+              {fieldErrors.email && (
+                <p className="text-red-400 text-xs mt-0.5">{fieldErrors.email}</p>
+              )}
             </div>
 
             <button
@@ -125,7 +144,7 @@ function PasswordReset() {
         )}
 
         {step === 2 && (
-          <form onSubmit={handleResetPassword} className="space-y-6">
+          <form onSubmit={handleResetPassword} className="space-y-6" noValidate>
             <div>
               <label className="block text-sm font-medium text-ironman-gold mb-2">
                 New Password

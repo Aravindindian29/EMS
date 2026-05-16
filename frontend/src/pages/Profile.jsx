@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { User, Lock, Mail, Shield, Pencil, Eye, EyeOff } from 'lucide-react';
 import { authAPI } from '../services/api';
-import { showToast } from '../components/Toast';
 
 function Profile({ user, setUser }) {
   const [passwordData, setPasswordData] = useState({
@@ -24,12 +23,12 @@ function Profile({ user, setUser }) {
     e.preventDefault();
     
     if (passwordData.new_password !== passwordData.confirm_password) {
-      showToast('New passwords do not match', 'error');
+      window.showToast('New passwords do not match', 'error');
       return;
     }
 
     if (passwordData.new_password.length < 8) {
-      showToast('New password must be at least 8 characters long', 'error');
+      window.showToast('New password must be at least 8 characters long', 'error');
       return;
     }
 
@@ -40,7 +39,7 @@ function Profile({ user, setUser }) {
         new_password: passwordData.new_password
       });
       
-      showToast('Password changed successfully', 'success');
+      window.showToast('Password changed successfully', 'success');
       setPasswordData({
         current_password: '',
         new_password: '',
@@ -48,7 +47,7 @@ function Profile({ user, setUser }) {
       });
     } catch (error) {
       const errorMessage = error.response?.data?.error || 'Failed to change password';
-      showToast(errorMessage, 'error');
+      window.showToast(errorMessage, 'error');
     } finally {
       setLoading(false);
     }
@@ -87,16 +86,16 @@ function Profile({ user, setUser }) {
     const lastNameError = validateName(nameData.last_name);
     
     if (firstNameError) {
-      showToast(firstNameError, 'error');
+      window.showToast(firstNameError, 'error');
       return;
     }
     if (lastNameError) {
-      showToast(lastNameError, 'error');
+      window.showToast(lastNameError, 'error');
       return;
     }
     
     if (!nameData.first_name && !nameData.last_name) {
-      showToast('At least one name field must be provided', 'error');
+      window.showToast('At least one name field must be provided', 'error');
       return;
     }
 
@@ -108,14 +107,14 @@ function Profile({ user, setUser }) {
       });
       
       setUser({ ...user, ...response.data });
-      showToast('Profile updated successfully', 'success');
+      window.showToast('Profile updated successfully', 'success');
       setEditingField(null);
     } catch (error) {
       const errorMessage = error.response?.data?.non_field_errors?.[0] || 
                           error.response?.data?.first_name?.[0] || 
                           error.response?.data?.last_name?.[0] || 
                           'Failed to update profile';
-      showToast(errorMessage, 'error');
+      window.showToast(errorMessage, 'error');
     } finally {
       setNameLoading(false);
     }
