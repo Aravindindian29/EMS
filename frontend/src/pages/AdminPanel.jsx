@@ -37,7 +37,9 @@ function AdminPanel() {
       setResult(response.data);
       setFile(null);
     } catch (err) {
-      setError(err.response?.data?.error || 'Failed to import file');
+      const errorMessage = err.response?.data?.error || err.message || 'Failed to import file';
+      setError(errorMessage);
+      console.error('Import error:', errorMessage);
     } finally {
       setUploading(false);
     }
@@ -144,7 +146,7 @@ function AdminPanel() {
                 <li>title</li>
                 <li>name</li>
                 <li>email</li>
-                <li>date_of_joining (YYYY-MM-DD)</li>
+                <li>date_of_joining (YYYY-MM-DD, YYYY/MM/DD, or DD/MM/YYYY)</li>
                 <li>type (Full Time/Intern/Contract)</li>
                 <li>status (Active/Exited)</li>
                 <li>reporting_to</li>
@@ -157,7 +159,7 @@ function AdminPanel() {
             <div>
               <h3 className="font-semibold text-white mb-2">Optional Columns:</h3>
               <ul className="text-sm space-y-1 list-disc list-inside">
-                <li>exit_date (YYYY-MM-DD)</li>
+                <li>exit_date (YYYY-MM-DD, YYYY/MM/DD, or DD/MM/YYYY)</li>
                 <li>exit_type (Voluntary/Termination)</li>
                 <li>us_team_head</li>
                 <li>india_head</li>

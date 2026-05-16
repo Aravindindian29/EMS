@@ -27,6 +27,20 @@ from django.http import HttpResponse
 from collections import defaultdict
 
 
+def parse_date(date_string):
+    """Parse date string supporting multiple formats: YYYY-MM-DD, YYYY/MM/DD, or DD/MM/YYYY"""
+    if not date_string or not date_string.strip():
+        raise ValueError(f"Date value is empty or None")
+    
+    date_string = date_string.strip()
+    date_formats = ['%Y-%m-%d', '%Y/%m/%d', '%d/%m/%Y']
+    for fmt in date_formats:
+        try:
+            return datetime.strptime(date_string, fmt).date()
+        except ValueError:
+            continue
+    raise ValueError(f"Date '{date_string}' does not match supported formats (YYYY-MM-DD, YYYY/MM/DD, or DD/MM/YYYY)")
+
 
 from .models import User, Employee, Team, VPIndia, ReportingManager
 
@@ -390,6 +404,15 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 
                 headers = rows[0]
 
+                # Map Excel headers to expected field names
+                header_mapping = {
+                    'employee_title': 'title',
+                    'reporting_t': 'reporting_to',
+                    'experience': 'experience_prior_adf',
+                    'us_team_h_india_head': 'us_team_head'
+                }
+                headers = [header_mapping.get(h, h) for h in headers]
+
                 data_rows = rows[1:]
 
             elif file.name.endswith('.csv'):
@@ -399,6 +422,15 @@ class EmployeeViewSet(viewsets.ModelViewSet):
                 reader = csv.reader(decoded_file)
 
                 headers = next(reader)
+
+                # Map CSV headers to expected field names
+                header_mapping = {
+                    'employee_title': 'title',
+                    'reporting_t': 'reporting_to',
+                    'experience': 'experience_prior_adf',
+                    'us_team_h_india_head': 'us_team_head'
+                }
+                headers = [header_mapping.get(h, h) for h in headers]
 
                 data_rows = list(reader)
 
@@ -418,7 +450,21 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 
                 try:
 
+                    # Auto-generate employee_id if missing
+                    if 'employee_id' in headers:
+                        employee_id = row[headers.index('employee_id')]
+                    else:
+                        # Generate employee_id: ADF + row number
+                        employee_id = f"ADF{idx:04d}"
+
+                    # Handle team column - skip if missing
+                    if 'team' not in headers:
+                        raise ValueError(f"Row {idx}: 'team' column is required")
+
                     team_name = row[headers.index('team')]
+                    if not team_name or not team_name.strip():
+                        raise ValueError(f"Row {idx}: 'team' column cannot be empty")
+                    team_name = team_name.strip()
 
                     team, _ = Team.objects.get_or_create(
 
@@ -434,11 +480,11 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 
                     )
 
-                    
+
 
                     employee_data = {
 
-                        'employee_id': row[headers.index('employee_id')],
+                        'employee_id': employee_id,
 
                         'title': row[headers.index('title')],
 
@@ -446,19 +492,19 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 
                         'email': row[headers.index('email')],
 
-                        'date_of_joining': datetime.strptime(row[headers.index('date_of_joining')], '%Y-%m-%d').date(),
+                        'date_of_joining': parse_date(row[headers.index('date_of_joining')]),
 
                         'type': row[headers.index('type')],
 
                         'status': row[headers.index('status')],
 
-                        'reporting_to': row[headers.index('reporting_to')],
+                        'reporting_to': row[headers.index('reporting_to')] if 'reporting_to' in headers else '',
 
                         'team': team,
 
-                        'vp_india': row[headers.index('vp_india')],
+                        'vp_india': row[headers.index('vp_india')] if 'vp_india' in headers else '',
 
-                        'experience_prior_adf': float(row[headers.index('experience_prior_adf')]),
+                        'experience_prior_adf': float(row[headers.index('experience_prior_adf')] if 'experience_prior_adf' in headers and row[headers.index('experience_prior_adf')] else 0),
 
                     }
 
@@ -466,7 +512,7 @@ class EmployeeViewSet(viewsets.ModelViewSet):
 
                     if 'exit_date' in headers and row[headers.index('exit_date')]:
 
-                        employee_data['exit_date'] = datetime.strptime(row[headers.index('exit_date')], '%Y-%m-%d').date()
+                        employee_data['exit_date'] = parse_date(row[headers.index('exit_date')])
 
                     if 'exit_type' in headers and row[headers.index('exit_type')]:
 
@@ -493,8 +539,9 @@ class EmployeeViewSet(viewsets.ModelViewSet):
             })
 
         except Exception as e:
-
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            import traceback
+            error_details = f"{str(e)}\n\nTraceback:\n{traceback.format_exc()}"
+            return Response({'error': error_details}, status=status.HTTP_400_BAD_REQUEST)
 
     
 

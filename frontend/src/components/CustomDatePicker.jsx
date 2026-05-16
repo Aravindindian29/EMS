@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 
 function CustomCalendar({
@@ -8,8 +7,7 @@ function CustomCalendar({
   isOpen,
   onClose,
   inputRef,
-  maxDate = new Date(),
-  position = { top: 0, left: 0 }
+  maxDate = new Date()
 }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectionMode, setSelectionMode] = useState('calendar');
@@ -148,13 +146,7 @@ function CustomCalendar({
   return (
     <div
       ref={calendarRef}
-      className="calendar-popup glossy-card p-4 min-w-[320px] shadow-glossy-lg"
-      style={{
-        position: 'absolute',
-        top: `${position.top}px`,
-        left: `${position.left}px`,
-        zIndex: 9999
-      }}
+      className="calendar-popup glossy-card p-4 min-w-[320px] shadow-glossy-lg absolute top-full left-0 mt-2 z-50"
     >
       <div className="flex items-center justify-between mb-4">
         <button
@@ -334,17 +326,16 @@ function CustomCalendar({
   );
 }
 
-function CustomDatePicker({ 
-  value, 
-  onChange, 
-  placeholder = "Select date", 
+function CustomDatePicker({
+  value,
+  onChange,
+  placeholder = "Select date",
   className = "",
   disabled = false,
   maxDate = new Date() // For DOJ, restrict to past dates
 }) {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const inputRef = useRef(null);
-  const [calendarPosition, setCalendarPosition] = useState({ top: 0, left: 0 });
 
   // Format date for display
   const formatDateForDisplay = (date) => {
@@ -368,31 +359,15 @@ function CustomDatePicker({
     setIsCalendarOpen(false);
   };
 
-  
-  // Toggle calendar and calculate position
+  // Toggle calendar
   const toggleCalendar = (event) => {
     if (event) {
       event.preventDefault();
       event.stopPropagation();
     }
-    
+
     if (!disabled && inputRef.current) {
-      if (!isCalendarOpen) {
-        // Calculate position relative to viewport for portal rendering
-        const inputRect = inputRef.current.getBoundingClientRect();
-        
-        // Position calendar 8px below the input field, using viewport coordinates
-        const top = inputRect.bottom + 8; // Viewport Y coordinate
-        const left = inputRect.left; // Viewport X coordinate
-        
-        // Set position immediately
-        setCalendarPosition({ top, left });
-        
-        // Open calendar after position is set
-        setIsCalendarOpen(true);
-      } else {
-        setIsCalendarOpen(false);
-      }
+      setIsCalendarOpen(!isCalendarOpen);
     }
   };
 
@@ -448,7 +423,7 @@ function CustomDatePicker({
             {formatDateForDisplay(value) || placeholder}
           </span>
         </button>
-        
+
         {/* Calendar Icon */}
         <button
           type="button"
@@ -459,21 +434,19 @@ function CustomDatePicker({
         >
           <Calendar className="w-4 h-4 text-ironman-gold" />
         </button>
-      </div>
 
-      {/* Calendar Container - Render using portal to avoid overflow issues */}
-      {isCalendarOpen && createPortal(
-        <CustomCalendar
-          selectedDate={value ? new Date(value) : null}
-          onDateSelect={handleDateSelect}
-          isOpen={isCalendarOpen}
-          onClose={closeCalendar}
-          inputRef={inputRef}
-          maxDate={maxDate}
-          position={calendarPosition}
-        />,
-        document.body
-      )}
+        {/* Calendar Container - Render inline */}
+        {isCalendarOpen && (
+          <CustomCalendar
+            selectedDate={value ? new Date(value) : null}
+            onDateSelect={handleDateSelect}
+            isOpen={isCalendarOpen}
+            onClose={closeCalendar}
+            inputRef={inputRef}
+            maxDate={maxDate}
+          />
+        )}
+      </div>
     </div>
   );
 }

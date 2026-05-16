@@ -9,6 +9,7 @@ function TeamWiseCount() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [wasInputFocused, setWasInputFocused] = useState(false);
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -19,6 +20,8 @@ function TeamWiseCount() {
     if (!isInitialLoad) {
       setLoading(false); // Don't show loading state during search
     }
+    // Check if input was focused before API call
+    setWasInputFocused(inputRef.current === document.activeElement);
     try {
       const response = await teamAPI.getAll({ search });
       const data = response.data.results || response.data;
@@ -35,8 +38,8 @@ function TeamWiseCount() {
     } finally {
       setLoading(false);
       setIsInitialLoad(false);
-      // Restore focus after data update
-      if (inputRef.current && document.activeElement !== inputRef.current) {
+      // Only restore focus if the user was actively typing in the search field
+      if (wasInputFocused && inputRef.current) {
         inputRef.current.focus();
       }
     }
